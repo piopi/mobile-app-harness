@@ -2,11 +2,9 @@
 
 The playbook behind this template: what each piece of the agent harness is, **why** it exists, the incident or measurement that shaped it, and how to rebuild it on another stack. AGENTS.md tells an agent what to do; this file tells whoever maintains or ports the harness why.
 
-It was extracted from a real app built mostly by AI agents working in parallel (see [Origin](#origin)). Numbers below come from that project's PRs, issues and research notes; the lessons are stated generically.
 
 ## Contents
 
-0. [Origin](#origin)
 1. [Principles](#1-principles)
 2. [Instructions: AGENTS.md, skills, the glossary](#2-instructions-agentsmd-skills-the-glossary)
 3. [Working with the human](#3-working-with-the-human)
@@ -29,22 +27,6 @@ It was extracted from a real app built mostly by AI agents working in parallel (
 20. [Rebuilding the harness on another stack](#20-rebuilding-the-harness-on-another-stack)
 21. [Incident log](#21-incident-log)
 22. [Open problems](#22-open-problems)
-
-## Origin
-
-<!-- The one place this file names the project the template came from. -->
-
-The template was extracted in October 2026 from **The 25th Hour** app (`piopi/25th-hour-app`), the mobile app of a run club: members RSVP to weekly runs, check in with a sticker tap or a staff scan of their Club Card, and earn kit at run-count thresholds. Agents ported it from the club's existing webapp, about 30 merged PRs in its first week, with several agents at once on one 14-core laptop.
-
-The club-specific episodes behind some generic lessons below:
-
-- **Capabilities, not one-offs (section 13):** the first data model hard-coded the club's time zone, check-in windows, Thursday schedule, meeting point and reward tiers; they became admin-editable rows (settings, locations, a run series that generates runs, a reward catalogue). When a second city and a seasonal Sunday run were announced, both were data changes.
-- **The reference never ships (section 16):** an agent put the webapp's https domain into the Club Card's QR payload; it became an app deep link.
-- **Study the reference source (section 16):** the sign-in port invented copy, merged the landing into sign-in, split the one-page onboarding into three screens and swapped the photos, because agents worked from screenshots.
-- **Native chrome (section 12):** the human chose, then rejected, every hand-built branded tab bar.
-- **Account-specific onboarding:** the club's onboarding (an emergency contact, an 18+ confirmation, a liability waiver) is domain content; the template keeps only the mechanism (a display name, versioned terms, and a PROJECT slot for fields and steps).
-
-`pnpm harness:diff` in that repo compares its harness with this template.
 
 ## 1. Principles
 
@@ -219,7 +201,6 @@ The club-specific episodes behind some generic lessons below:
 
 ## 13. Data: capabilities, RPCs, types
 
-**Capabilities, not one-offs.** The source project's first data model hard-coded its rules (a time zone, time windows, a schedule, a place, thresholds) in SQL and code. A follow-up moved every one of them to admin-editable rows and removed the shared constants. When the human then announced a second region and a seasonal variant, both were data changes, not code changes ([Origin](#origin)). Rule: name the general capability behind a ticket and what an admin will want to change, and model that; copy that names a place, a time or a count is filled from data.
 
 **RPC conventions.** Reads go direct under RLS; anything that grants value goes through a `security definer` RPC with the gate inside (`private.require_member()`, `require_admin()`). Errors are codes, not copy: `P0001` (rule) or `42501` (access) with a snake_case message from `RPC_ERROR_CODES` and a plain hint; the app maps codes to copy. Admin edits take a strict jsonb patch (absent keeps, null clears, unknown fails). Every staff or admin action writes the append-only audit log in the same transaction. plpgsql parameters shadow columns: `#variable_conflict use_variable`.
 
@@ -259,7 +240,6 @@ When a project rebuilds an existing app (a webapp, an old native app), set `refe
 - **Study the reference screen first, from its source.** Incident: a sign-in PR invented copy, merged two screens into one, split a one-page form into three and used other photos, because agents ported from screenshots alone. Screenshots miss copy, assets and rules.
 - **Port 1 to 1** (features, copy word for word, assets); the design may improve with a stated UX reason in the PR's parity table.
 - **Fix the reference's bugs rather than port them**, and list them.
-- **The reference never ships:** an agent once put the reference app's web domain into a native payload ([Origin](#origin)).
 - **Retire the tooling after the port** (the invariant, the parity step, the PR section), then run a harness eval to check new agents no longer reach for it.
 
 ## 17. Dependencies
