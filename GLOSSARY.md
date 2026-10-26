@@ -1,11 +1,11 @@
-# Acme
+# Example App
 
 PROJECT: one line on what the app is. This file is the project's vocabulary: every domain word, what it means, and the words to avoid. Agents use these words in code, copy and PRs. Grow it with the domain-modeling skill as the domain takes shape.
 
 ## Roles
 
 **Member**:
-A person with an account who has finished onboarding.
+A person with an account who has finished onboarding. Their profile is a display name (plus whatever onboarding fields the project adds).
 _Avoid_: User, customer
 
 **Staff**:
@@ -23,7 +23,7 @@ The one screen group the app opens for an account state (`launch_status().mode`)
 
 **Terms**:
 The versioned terms of use every member accepts; an admin publishes a new version and everyone accepts it again.
-_Avoid_: Waiver, EULA (unless the project's lawyers say so)
+_Avoid_: EULA (unless the project's lawyers say so)
 
 **Hold**:
 A gate with nothing to do but read and sign out (a suspended account).

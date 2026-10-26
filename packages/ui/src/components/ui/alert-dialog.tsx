@@ -24,8 +24,8 @@ const alertDialogVariants = tv({
     overlay: 'absolute inset-0 items-center justify-center bg-ink/60 px-6',
     content: 'bg-surface-elevated border-hairline w-full max-w-[400px] gap-6 rounded-xl border px-6 pt-7 pb-6',
     header: 'gap-2',
-    title: 'font-sans-bold text-foreground text-[22px] leading-[26px] tracking-[-0.2px]',
-    description: 'text-muted-foreground font-sans text-[15px] leading-[22px]',
+    title: 'font-bold text-foreground text-[22px] leading-[26px] tracking-[-0.2px]',
+    description: 'text-muted-foreground font-normal text-[15px] leading-[22px]',
     footer: 'gap-2',
   },
 });

@@ -3,7 +3,7 @@
 The single instruction file for every coding agent (Claude Code reads it natively; a CLAUDE.md would override it, so there is none). Domain words: [GLOSSARY.md](GLOSSARY.md). Why the harness is built this way: [HARNESS.md](HARNESS.md).
 
 <!-- PROJECT:about -->
-**Acme** is PROJECT: one sentence on what the app does and for whom. Planning lives on PROJECT: the wayfinder map (issue link).
+**Example App** is PROJECT: one sentence on what the app does and for whom. Planning lives on PROJECT: the wayfinder map (issue link).
 <!-- /PROJECT -->
 
 ## Working with the human
@@ -52,11 +52,11 @@ The single instruction file for every coding agent (Claude Code reads it nativel
 - **Official before custom.** Before you build anything that touches device edges, system UI or platform behaviour (safe areas and insets, edge-to-edge, status and navigation bars, keyboard, headers, tabs, sheets, modals, blur, haptics, images, icons, fonts, gestures, scroll-linked headers), look for the official or Expo module that already does it: the SDK docs, the expo skills, and the dependencies we already have. Use it, and customise it through its API. Hand-build only when nothing fits, and say in the PR what you checked and why it fell short.
 - **Navigation and layout are Expo Router.** Structure lives in the file tree: route groups (`(auth)`, `(onboarding)`, `(tabs)`), `_layout.tsx` per level, `Stack.Protected` for the account gates, modals and sheets through `presentation`, headers through `Stack.Screen` options, deep links through `+native-intent`, typed routes. Chrome is native (`NativeTabs`, native stack headers, sheets), branded through its API. Safe areas come from `react-native-safe-area-context` (through `Screen` in packages/ui or the native header), never from hard-coded padding. Lint blocks hand-rolled navigators and RN `<Modal>`.
 - **No native alert popups.** `Alert.alert`, `ActionSheetIOS` and system confirm dialogs are banned (lint). Confirmations, errors and choices use the branded `AlertDialog` / `ActionSheet` from packages/ui, or a router sheet route. This is the one deliberate exception to native chrome.
-- **Build capabilities, not one-offs.** Model each feature as a general, configurable capability (a catalogue rather than three hard-coded items, a schedule rather than "every Thursday"). Project data (places, schedules, thresholds, windows, labels) lives in seeded database rows that admins can edit, and RPCs and screens read it; the app holds only copy. When a feature needs a new project value, add it to the data model along with an admin path to change it.
+- **Build capabilities, not one-offs.** Model each feature as a general, configurable capability (a catalogue rather than three hard-coded items, a schedule rather than one fixed weekday). Project data (places, schedules, thresholds, windows, labels) lives in seeded database rows that admins can edit, and RPCs and screens read it; the app holds only copy. When a feature needs a new project value, add it to the data model along with an admin path to change it.
 - **Dev hooks stay dev-only:** `<scheme>://__agent/*` is ignored outside `__DEV__`; Storybook ships only with `EXPO_PUBLIC_STORYBOOK=true`.
 <!-- PROJECT:invariants -->
 <!-- Brand, domain and parity rules that bind every PR. Examples: the default appearance and why; "port the reference
-     app 1 to 1 (features, copy, assets), the design may improve, say why in the PR"; "never assume one city or
+     app 1 to 1 (features, copy, assets), the design may improve, say why in the PR"; "never assume one region or
      one time zone". Keep each to one line with its reason. -->
 <!-- /PROJECT -->
 

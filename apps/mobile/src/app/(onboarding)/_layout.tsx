@@ -5,7 +5,7 @@ import { APP_NAME } from '../../lib/app';
 import { useSession } from '../../lib/session';
 
 /**
- * First run (details, then the consents) and the terms re-accept. Sign out is always in the header: a person who
+ * First run (the profile, then the terms) and the terms re-accept. Sign out is always in the header: a person who
  * signed in with the wrong account can leave.
  */
 export default function OnboardingLayout() {
@@ -15,7 +15,7 @@ export default function OnboardingLayout() {
   return (
     <Stack screenOptions={{ ...stack, title: APP_NAME, headerRight: signOut, headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Protected guard={mode === 'onboarding'}>
-        <Stack.Screen name="details" />
+        <Stack.Screen name="profile" />
         <Stack.Screen name="consent" />
       </Stack.Protected>
       <Stack.Protected guard={mode === 'terms'}>

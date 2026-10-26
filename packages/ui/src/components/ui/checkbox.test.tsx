@@ -4,10 +4,10 @@ import { Checkbox } from './checkbox';
 describe('Checkbox', () => {
   it('is a checkbox whose whole row toggles it', async () => {
     const onCheckedChange = jest.fn();
-    await render(<Checkbox checked={false} onCheckedChange={onCheckedChange} label="I am 18 or older." testID="adult" />);
-    const box = screen.getByRole('checkbox', { name: 'I am 18 or older.' });
+    await render(<Checkbox checked={false} onCheckedChange={onCheckedChange} label="I accept the terms." testID="accept" />);
+    const box = screen.getByRole('checkbox', { name: 'I accept the terms.' });
     expect(box).not.toBeChecked();
-    await fireEvent.press(screen.getByText('I am 18 or older.'));
+    await fireEvent.press(screen.getByText('I accept the terms.'));
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
 

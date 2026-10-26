@@ -1,5 +1,5 @@
 # A new person signs up: the landing → Get started → an email code (read from this stack's Mailpit) → onboarding
-# 1 / 2 (name) → 2 / 2 (18+, the terms, updates) → Home. A new address every run, so it always meets onboarding.
+# 1 / 2 (profile) → 2 / 2 (the terms, updates) → Home. A new address every run, so it always meets onboarding.
 # scenario: base
 appId: ${APP_ID}
 name: Sign up with an email code, onboarding, Home
@@ -32,24 +32,20 @@ name: Sign up with an email code, onboarding, Home
 # Onboarding 1 / 2
 - extendedWaitUntil:
     visible:
-      id: onboarding-details
+      id: onboarding-profile
     timeout: 15000
 - assertVisible: Signed in as ${output.email}
 - tapOn:
-    id: first-name
-- inputText: Mae
-- pressKey: Enter
-- inputText: Stro
+    id: display-name
+- inputText: Jordan
 - tapOn:
-    id: details-continue
+    id: profile-continue
 
 # Onboarding 2 / 2
 - extendedWaitUntil:
     visible:
       id: onboarding-consent
     timeout: 10000
-- tapOn:
-    id: adult
 - tapOn:
     id: open-terms-text
 - assertVisible: Using the app

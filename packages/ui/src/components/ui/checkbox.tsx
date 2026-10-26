@@ -1,6 +1,6 @@
 // Seeded from react-native-reusables (checkbox, @rn-primitives/checkbox), restyled: a box with a
 // control-contrast edge, primary fill and a Phosphor check when ticked, and the label beside it. The whole row is
-// the touch target (role checkbox, checked state announced). Consents (18+, the terms, updates) use it.
+// the touch target (role checkbox, checked state announced). Consents (the terms, updates) use it.
 import * as CheckboxPrimitive from '@rn-primitives/checkbox';
 import * as React from 'react';
 import { View } from 'react-native';
@@ -25,7 +25,7 @@ const checkboxVariants = tv({
 type CheckboxProps = Omit<VariantProps<typeof checkboxVariants>, 'state'> & {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
-  /** What ticking it means, in the member's words ("I am 18 or older."). */
+  /** What ticking it means, in the member's words ("I accept the terms."). */
   label: string;
   /** A muted line under the label. */
   description?: string;

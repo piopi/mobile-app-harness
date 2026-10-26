@@ -26,7 +26,7 @@ The values live in code (`packages/ui/src/theme.css`, `src/lib/motion.ts`, `src/
 |---|---|---|
 | A brand colour, the radius, the default appearance | `harness.config.json` → `brand` | `pnpm harness:apply` (writes the `harness:tokens` block in `theme.css` and the placeholder icons) |
 | A new semantic colour | `theme.css`, outside the markers, light **and** dark, with its contrast in a comment | use it by name (`bg-<name>`) |
-| The font | see "Change the font" below | retake design-system shots |
+| The font (system font in the template) | see "Change the font" below | retake design-system shots |
 | A component's look | its `tv` variants in `packages/ui/src/components/ui/<name>.tsx` | story screenshot |
 | The tab bar or headers | `packages/ui/src/lib/navigation.ts` (`useNativeTabsTheme`, `useStackTheme`) | iOS + Android shots |
 | A tab icon | `src/lib/icons.ts` (`ICON_GLYPHS`, `TAB_ICONS`, `TAB_ICON_WEIGHTS`) | `pnpm --filter @app/ui tab-icons`, commit the PNGs |
@@ -66,7 +66,7 @@ Read a token in JS (`placeholderTextColor`, native chrome) with `useCSSVariable(
 | `data` | Times, counts, codes (mono, tabular) |
 | `micro` | Legal, timestamps. Nothing smaller |
 
-`tone`: `muted`, `primary`, `accent`, `danger`, `on-ink`, `inverse`; an explicit tone beats a parent's colour. Weights are separate families (`font-sans-semibold`, `font-display`, `font-mono-medium`); never `font-bold` (Android fakes it).
+`tone`: `muted`, `primary`, `accent`, `danger`, `on-ink`, `inverse`; an explicit tone beats a parent's colour. The template uses the system font with weight utilities (`font-medium`, `font-semibold`, `font-bold`, `font-extrabold`); data uses tabular figures.
 
 PROJECT: headline case, punctuation and the brand's voice rules.
 
@@ -118,12 +118,12 @@ Never `Alert.alert`, `ActionSheetIOS` or RN `<Modal>` (lint).
 
 ## Change the font
 
-Font names live in four places that must agree; change them together in one PR:
+The template ships the system font (San Francisco / Roboto), which has real weights. A brand font lives in four places that must agree; change them together in one PR:
 
-1. Add the static OFL `.ttf` files and their licence to `packages/ui/assets/fonts/`, one file per weight (no variable fonts: Android fakes weights). `npm pack @expo-google-fonts/<family>` is a quick source.
-2. Register them in `packages/ui/src/lib/fonts.ts` (`fontAssets`); the keys are the family names.
-3. Point the `--font-*` tokens in `packages/ui/src/theme.css` at the new names.
-4. Update `FONT` in `fonts.ts` (the native chrome's title and tab label families: native chrome can't read CSS tokens).
+1. Add the static OFL `.ttf` files and their licence to `packages/ui/assets/fonts/`, one file per weight (no variable fonts). `npm pack @expo-google-fonts/<family>` is a quick source.
+2. Register them in `packages/ui/src/lib/fonts.ts` (`fontAssets`); the keys are the family names. `AppRoot` loads them before the first screen.
+3. In `packages/ui/src/theme.css`, add one `--font-<role>` token per file (`--font-sans: 'Brand_400Regular'`, `--font-sans-bold: 'Brand_700Bold'`…), then in `packages/ui` replace each weight utility with its family token (`grep -rnE "font-(medium|semibold|bold|extrabold)" packages/ui/src`). With one file per weight, Android fakes a weight applied on top of a family, so a weight utility and a custom family never go together. Teach `cn` the new family names (`classGroups` in `src/lib/utils.ts`) so later classes win.
+4. Set `FONT` in `fonts.ts` (the native chrome's title and tab label families, without `fontWeight`): native chrome can't read CSS tokens.
 
 Then check line heights in the Text variants and retake every design-system and tab-bar screenshot. New fonts are a native asset change: `pnpm wt up` rebuilds.
 

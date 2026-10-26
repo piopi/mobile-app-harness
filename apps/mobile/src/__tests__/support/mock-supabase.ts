@@ -47,7 +47,7 @@ export function emitAuth(event: string, session: unknown) {
   listeners.forEach((l) => l(event, session));
 }
 
-export function fakeSession(email = 'olly@app.test', metadata: Record<string, unknown> = {}) {
+export function fakeSession(email = 'new@app.test', metadata: Record<string, unknown> = {}) {
   return { access_token: 't', user: { id: `user-${email}`, email, user_metadata: metadata } };
 }
 

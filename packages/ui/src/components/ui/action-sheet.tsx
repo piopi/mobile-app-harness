@@ -23,10 +23,10 @@ const actionSheetVariants = tv({
     panel: 'bg-surface-elevated rounded-t-sheet gap-1 px-4 pt-3',
     grabber: 'bg-foreground/20 mb-3 h-[4px] w-9 self-center rounded-full',
     header: 'gap-1 pb-3',
-    title: 'font-sans-bold text-foreground text-[20px] leading-[24px] tracking-[-0.2px]',
-    message: 'text-muted-foreground font-sans text-[15px] leading-[22px]',
+    title: 'font-bold text-foreground text-[20px] leading-[24px] tracking-[-0.2px]',
+    message: 'text-muted-foreground font-normal text-[15px] leading-[22px]',
     row: 'border-hairline min-h-[52px] flex-row items-center justify-between gap-3 border-t',
-    rowLabel: 'font-sans-medium text-foreground text-[17px] leading-[22px]',
+    rowLabel: 'font-medium text-foreground text-[17px] leading-[22px]',
     cancel: 'border-control mt-3 h-[52px] items-center justify-center rounded-md border',
   },
   variants: {

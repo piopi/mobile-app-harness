@@ -47,6 +47,8 @@ function RootStack() {
         <Stack.Protected guard={open('signed_out')}>
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
+        {/* PROJECT: a new onboarding step is a screen in (onboarding); a step the app can't open without is also
+            a check in launch_status() (the db-change skill, "Add an onboarding field or step"). */}
         <Stack.Protected guard={open('onboarding') || open('terms')}>
           <Stack.Screen name="(onboarding)" />
         </Stack.Protected>

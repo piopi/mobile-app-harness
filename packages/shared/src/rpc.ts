@@ -14,7 +14,7 @@ const optionalText = (max: number) => z.string().trim().max(max).optional();
 
 export const appRole = z.enum(['member', 'staff', 'admin']);
 export const memberStatus = z.enum(['active', 'suspended']);
-export const consentKind = z.enum(['terms', 'adult', 'marketing']);
+export const consentKind = z.enum(['terms', 'marketing']);
 export const itemStatus = z.enum(['draft', 'published', 'archived']);
 
 const empty = z.object({}).strict();
@@ -46,11 +46,11 @@ export const rpcInputs = {
   launch_status: empty,
   // Member
   complete_onboarding: z.object({
-    first_name: text(60),
-    last_name: text(60),
+    display_name: text(60),
     terms_version: text(20),
-    adult: z.literal(true),
     marketing: z.boolean().optional(),
+    /** PROJECT: EXAMPLE onboarding field; replace or delete it. */
+    about: optionalText(280),
   }),
   accept_terms: z.object({ version: text(20) }),
   // Admin
@@ -93,7 +93,7 @@ export const RPC_ERROR_CODES = [
   // gates
   'onboarding_required', 'terms_required',
   // onboarding and terms
-  'name_required', 'adult_required', 'terms_version_mismatch', 'terms_exists', 'invalid_terms',
+  'name_required', 'invalid_profile', 'terms_version_mismatch', 'terms_exists', 'invalid_terms',
   // admin
   'invalid_patch', 'invalid_settings', 'title_required', 'invalid_item', 'item_not_found',
   'invalid_role', 'member_not_found', 'cannot_revoke_own_admin', 'cannot_change_own_status',
@@ -113,7 +113,7 @@ export const launchStatus = z.object({
   member_id: uuid.optional(),
   /** The account's email ("Signed in as"); null for an Apple identity that shared no email. */
   email: z.string().nullable().optional(),
-  first_name: z.string().nullable().optional(),
+  display_name: z.string().nullable().optional(),
   /** The project's contact email (app_settings), for the hold screens. Null until an admin sets one. */
   contact_email: z.string().nullable().optional(),
   roles: z.array(appRole).optional(),

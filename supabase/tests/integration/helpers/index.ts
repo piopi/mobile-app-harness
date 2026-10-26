@@ -25,15 +25,15 @@ export type Role = 'member' | 'staff' | 'admin' | 'anon';
 
 /** The seeded account behind each role (supabase/seed.sql). */
 export const ACCOUNTS = {
-  member: 'ada@app.test',
+  member: 'member@app.test',
   staff: 'staff@app.test',
   admin: 'admin@app.test',
 } as const;
 
 /** Member ids from the base seed. */
 export const IDS = {
-  ada: '00000000-0000-4000-9000-0000000000a1',
-  bo: '00000000-0000-4000-9000-0000000000b2',
+  member: '00000000-0000-4000-9000-0000000000a1',
+  member2: '00000000-0000-4000-9000-0000000000b2',
   staff: '00000000-0000-4000-9000-00000000005a',
   admin: '00000000-0000-4000-9000-0000000000ad',
 } as const;

@@ -20,7 +20,7 @@ export const tabIcons: Record<TabIconName, { default: ImageSourcePropType; selec
 };
 
 /** Tab label type. The native label style takes family, size, weight and colour only (no textTransform, no tracking). */
-export const tabLabelFont = { fontFamily: FONT.tabLabel, fontSize: 10, fontWeight: '500' as const };
+export const tabLabelFont = { ...FONT.tabLabel, fontSize: 10 };
 
 function useToken(name: string, fallback: string): string {
   return (useCSSVariable(`--color-${name}`) as string | undefined) ?? fallback;
@@ -41,10 +41,10 @@ function withAlpha(hex: string, alpha: number) {
  * background, so the background props only apply on iOS 18 and earlier. PROJECT: tune these to the brand.
  */
 export function useNativeTabsTheme() {
-  const foreground = useToken('foreground', '#111111');
-  const muted = useToken('muted-foreground', '#6b6b6b');
-  const surface = useToken('surface', '#f2f1ee');
-  const primary = useToken('primary', '#111111');
+  const foreground = useToken('foreground', '#111827');
+  const muted = useToken('muted-foreground', '#6b7280');
+  const surface = useToken('surface', '#f3f4f6');
+  const primary = useToken('primary', '#111827');
   const onPrimary = useToken('primary-foreground', '#ffffff');
   const android = process.env.EXPO_OS === 'android';
   return {
@@ -87,17 +87,17 @@ export function useNativeTabsTheme() {
  * up under the header when the keyboard opens; an opaque bar keeps the content below it.
  */
 export function useStackTheme({ ground = 'background', header = 'floating' }: { ground?: 'background' | 'ink'; header?: 'floating' | 'opaque' } = {}) {
-  const themeForeground = useToken('foreground', '#111111');
+  const themeForeground = useToken('foreground', '#111827');
   const themeBackground = useToken('background', '#ffffff');
-  const ink = useToken('ink', '#0a0a0a');
-  const onInk = useToken('on-ink', '#f2f1ee');
+  const ink = useToken('ink', '#050608');
+  const onInk = useToken('on-ink', '#f3f4f6');
   const foreground = ground === 'ink' ? onInk : themeForeground;
   const background = ground === 'ink' ? ink : themeBackground;
   const ios = process.env.EXPO_OS === 'ios';
   return {
     headerTintColor: foreground,
-    headerTitleStyle: { fontFamily: FONT.title, fontSize: 17, color: foreground },
-    headerLargeTitleStyle: { fontFamily: FONT.largeTitle, fontSize: 34, color: foreground },
+    headerTitleStyle: { ...FONT.title, fontSize: 17, color: foreground },
+    headerLargeTitleStyle: { ...FONT.largeTitle, fontSize: 34, color: foreground },
     headerShadowVisible: false,
     headerLargeTitleShadowVisible: false,
     headerBackButtonDisplayMode: 'minimal' as const,
@@ -113,11 +113,11 @@ export function useStackTheme({ ground = 'background', header = 'floating' }: { 
 /** Colours for Expo Router's `ThemeProvider` (React Navigation theme): what the navigators paint between screens. */
 export function useNavigationColors() {
   return {
-    primary: useToken('foreground', '#111111'),
+    primary: useToken('foreground', '#111827'),
     background: useToken('background', '#ffffff'),
     card: useToken('background', '#ffffff'),
-    text: useToken('foreground', '#111111'),
-    border: useToken('hairline', '#e4e2dd'),
-    notification: useToken('foreground', '#111111'),
+    text: useToken('foreground', '#111827'),
+    border: useToken('hairline', '#e5e7eb'),
+    notification: useToken('foreground', '#111827'),
   };
 }

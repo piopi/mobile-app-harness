@@ -2,10 +2,11 @@
 
 The playbook behind this template: what each piece of the agent harness is, **why** it exists, the incident or measurement that shaped it, and how to rebuild it on another stack. AGENTS.md tells an agent what to do; this file tells whoever maintains or ports the harness why.
 
-It was extracted from a real app built mostly by AI agents working in parallel (an Expo + Supabase club app, about 30 merged PRs in its first week, several agents at once on one laptop). Numbers below come from that project's PRs, issues and research notes.
+It was extracted from a real app built mostly by AI agents working in parallel (see [Origin](#origin)). Numbers below come from that project's PRs, issues and research notes; the lessons are stated generically.
 
 ## Contents
 
+0. [Origin](#origin)
 1. [Principles](#1-principles)
 2. [Instructions: AGENTS.md, skills, the glossary](#2-instructions-agentsmd-skills-the-glossary)
 3. [Working with the human](#3-working-with-the-human)
@@ -28,6 +29,22 @@ It was extracted from a real app built mostly by AI agents working in parallel (
 20. [Rebuilding the harness on another stack](#20-rebuilding-the-harness-on-another-stack)
 21. [Incident log](#21-incident-log)
 22. [Open problems](#22-open-problems)
+
+## Origin
+
+<!-- The one place this file names the project the template came from. -->
+
+The template was extracted in October 2026 from **The 25th Hour** app (`piopi/25th-hour-app`), the mobile app of a run club: members RSVP to weekly runs, check in with a sticker tap or a staff scan of their Club Card, and earn kit at run-count thresholds. Agents ported it from the club's existing webapp, about 30 merged PRs in its first week, with several agents at once on one 14-core laptop.
+
+The club-specific episodes behind some generic lessons below:
+
+- **Capabilities, not one-offs (section 13):** the first data model hard-coded the club's time zone, check-in windows, Thursday schedule, meeting point and reward tiers; they became admin-editable rows (settings, locations, a run series that generates runs, a reward catalogue). When a second city and a seasonal Sunday run were announced, both were data changes.
+- **The reference never ships (section 16):** an agent put the webapp's https domain into the Club Card's QR payload; it became an app deep link.
+- **Study the reference source (section 16):** the sign-in port invented copy, merged the landing into sign-in, split the one-page onboarding into three screens and swapped the photos, because agents worked from screenshots.
+- **Native chrome (section 12):** the human chose, then rejected, every hand-built branded tab bar.
+- **Account-specific onboarding:** the club's onboarding (an emergency contact, an 18+ confirmation, a liability waiver) is domain content; the template keeps only the mechanism (a display name, versioned terms, and a PROJECT slot for fields and steps).
+
+`pnpm harness:diff` in that repo compares its harness with this template.
 
 ## 1. Principles
 
@@ -195,13 +212,13 @@ It was extracted from a real app built mostly by AI agents working in parallel (
 
 **One icon system.** Phosphor (maintained, six weights including `fill`; Lucide was rejected for having no filled variants). NativeTabs takes images, not components, so `pnpm --filter @app/ui tab-icons` rasterises the same glyph data to template PNGs with CanvasKit.
 
-**Fonts live in four places** (assets, `fonts.ts`, the CSS tokens, the native chrome names in `FONT`), because native chrome can't read CSS tokens: the design-system skill's "Change the font" recipe keeps them in step. Static instances only: Android fakes weights of variable fonts and of `font-bold`.
+**The template uses the system font** (real weights, nothing bundled) and a neutral palette as placeholders. A brand font lives in four places (assets, `fonts.ts`, the CSS tokens, the native chrome names in `FONT`), because native chrome can't read CSS tokens: the design-system skill's "Change the font" recipe keeps them in step. Static instances only, one family token per weight: Android fakes a weight applied on top of a single-weight family.
 
 **Form stacks need an opaque iOS header.** Under a floating one, React Native's keyboard inset handling scrolls a short form under the bar (`useStackTheme({ header: 'opaque' })`).
 
 ## 13. Data: capabilities, RPCs, types
 
-**Capabilities, not one-offs.** The first data model hard-coded the time zone, the check-in windows, the weekly schedule, the meeting point and the reward tiers in SQL and code. A follow-up moved every one of them to admin-editable rows (settings, locations, a run series that generates runs, a reward catalogue) and removed the shared constants. Then the human announced a second city and a seasonal series; because the values were data, that was a data change. Rule: name the general capability behind a ticket and what an admin will want to change, and model that; copy that names a place, a time or a count is filled from data.
+**Capabilities, not one-offs.** The source project's first data model hard-coded its rules (a time zone, time windows, a schedule, a place, thresholds) in SQL and code. A follow-up moved every one of them to admin-editable rows and removed the shared constants. When the human then announced a second region and a seasonal variant, both were data changes, not code changes ([Origin](#origin)). Rule: name the general capability behind a ticket and what an admin will want to change, and model that; copy that names a place, a time or a count is filled from data.
 
 **RPC conventions.** Reads go direct under RLS; anything that grants value goes through a `security definer` RPC with the gate inside (`private.require_member()`, `require_admin()`). Errors are codes, not copy: `P0001` (rule) or `42501` (access) with a snake_case message from `RPC_ERROR_CODES` and a plain hint; the app maps codes to copy. Admin edits take a strict jsonb patch (absent keeps, null clears, unknown fails). Every staff or admin action writes the append-only audit log in the same transaction. plpgsql parameters shadow columns: `#variable_conflict use_variable`.
 
@@ -210,6 +227,8 @@ It was extracted from a real app built mostly by AI agents working in parallel (
 **Why no ORM.** Only `supabase gen types` produces function `Args`. In a spike, a popular ORM's migration generator silently dropped the `USING` / `WITH CHECK` of 3 policies and stripped regex backslashes from 6 CHECK constraints, and all 453 pgTAP tests still passed; its new migration folder format was silently skipped by the Supabase CLI. Hand-written SQL migrations plus pgTAP won.
 
 **Identity.** `members.id` is not `auth.uid()`; a member links to `auth.users` through `auth_user_id` and SQL uses `current_member_id()`. Roles are grants in `member_roles`, read on every call; the JWT claim is a UI hint only, so a revoked role stops working before the token expires.
+
+**Onboarding is a PROJECT slot.** The template's profile is only a display name, `created_at` and `onboarded_at`, plus versioned terms. Domain fields (an age confirmation, a contact, a preference) are added per project with one recipe (the db-change skill, "Add an onboarding field or step"): a column, the `complete_onboarding` argument, the `launch_status` check when the app can't open without it, the zod schema, and a field or a step in the onboarding stack. One EXAMPLE field (`about`, optional) shows every place it touches and is meant to be replaced.
 
 ## 14. Tests and CI
 
@@ -239,7 +258,7 @@ When a project rebuilds an existing app (a webapp, an old native app), set `refe
 - **Study the reference screen first, from its source.** Incident: a sign-in PR invented copy, merged two screens into one, split a one-page form into three and used other photos, because agents ported from screenshots alone. Screenshots miss copy, assets and rules.
 - **Port 1 to 1** (features, copy word for word, assets); the design may improve with a stated UX reason in the PR's parity table.
 - **Fix the reference's bugs rather than port them**, and list them.
-- **The reference never ships:** an agent once put the reference app's web domain into a native QR payload.
+- **The reference never ships:** an agent once put the reference app's web domain into a native payload ([Origin](#origin)).
 - **Retire the tooling after the port** (the invariant, the parity step, the PR section), then run a harness eval to check new agents no longer reach for it.
 
 ## 17. Dependencies
@@ -300,7 +319,7 @@ Keep the order of work: slots and the local backend first (everything else depen
 | Hand-built tab bars rejected after prototyping | NativeTabs, branded through its API; "official before custom" |
 | Invented copy, merged and split screens in a port | Study the reference source first; parity table in the PR |
 | Reference app's web domain in a native payload | "The reference never ships" |
-| Hard-coded schedule, windows and tiers | Project values as admin-editable rows; "capabilities, not one-offs" |
+| Hard-coded schedule, windows and thresholds | Project values as admin-editable rows; "capabilities, not one-offs" |
 | ORM spike lost policy expressions silently | Hand-written SQL + pgTAP; generated types |
 | pgTAP failure 1 in 64 runs | Tamper with a value guaranteed to differ |
 | AGENTS.md restating package.json and the tree | Pruned to non-discoverable gotchas |

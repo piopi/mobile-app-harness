@@ -18,8 +18,8 @@ describe('launch_status', () => {
     const { client } = await newAccount('gates');
     const first = expectOk(await client.rpc('launch_status')).data as { mode: string };
     expect(first.mode).toBe('onboarding');
-    expectRpcError(await client.rpc('complete_onboarding', { first_name: 'New', last_name: 'Person', terms_version: '0.0', adult: true }), 'terms_version_mismatch');
-    const done = expectOk(await client.rpc('complete_onboarding', { first_name: 'New', last_name: 'Person', terms_version: await currentTerms(), adult: true }));
+    expectRpcError(await client.rpc('complete_onboarding', { display_name: 'New Person', terms_version: '0.0' }), 'terms_version_mismatch');
+    const done = expectOk(await client.rpc('complete_onboarding', { display_name: 'New Person', terms_version: await currentTerms(), about: 'Example field.' }));
     expect((done.data as { mode: string }).mode).toBe('member');
   });
 
@@ -33,7 +33,7 @@ describe('launch_status', () => {
 describe('holds', () => {
   it('a suspended member is held and refused', async () => {
     const { client } = await newAccount('held');
-    expectOk(await client.rpc('complete_onboarding', { first_name: 'Held', last_name: 'Person', terms_version: await currentTerms(), adult: true }));
+    expectOk(await client.rpc('complete_onboarding', { display_name: 'Held Person', terms_version: await currentTerms() }));
     await db.query(`update public.members set status = 'suspended' where email like 'held-%'`);
     const { data } = expectOk(await client.rpc('launch_status'));
     expect((data as { mode: string }).mode).toBe('suspended');
@@ -44,10 +44,10 @@ describe('holds', () => {
 describe('roles', () => {
   it('only admins grant roles, and an admin cannot drop their own admin role', async () => {
     const member = await asRole('member');
-    expectForbidden(await member.rpc('grant_role', { member_id: IDS.bo, role: 'staff' }), 'admin_only');
+    expectForbidden(await member.rpc('grant_role', { member_id: IDS.member2, role: 'staff' }), 'admin_only');
     const admin = await asRole('admin');
-    expectOk(await admin.rpc('grant_role', { member_id: IDS.bo, role: 'staff' }));
-    expectOk(await admin.rpc('revoke_role', { member_id: IDS.bo, role: 'staff' }));
+    expectOk(await admin.rpc('grant_role', { member_id: IDS.member2, role: 'staff' }));
+    expectOk(await admin.rpc('revoke_role', { member_id: IDS.member2, role: 'staff' }));
     expectRpcError(await admin.rpc('revoke_role', { member_id: IDS.admin, role: 'admin' }), 'cannot_revoke_own_admin');
   });
 });

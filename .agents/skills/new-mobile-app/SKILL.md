@@ -75,7 +75,7 @@ Wait until the 5-minute load is under the core count, then:
 
 ```bash
 pnpm wt up                    # first run builds the dev client (minutes); later runs reuse the cache
-pnpm agent sign-in '{"email":"ada@app.test"}'
+pnpm agent sign-in '{"email":"member@app.test"}'
 pnpm exec agent-device open <bundleId> --platform ios --udid <udid from .wt/state.json> --session wt-<k> --metro-port <port>
 pnpm exec agent-device wait text "Harness ready." --session wt-<k>
 pnpm exec agent-device screenshot /tmp/smoke.png --scale 0.4 --session wt-<k>

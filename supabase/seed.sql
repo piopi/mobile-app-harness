@@ -3,10 +3,10 @@
 --
 -- Every account signs in with password "password123". Fixed ids so tests and scenarios can use them:
 -- the auth user id and the member id share their last digits (auth …-8000-…, member …-9000-…).
---   admin@app.test  Alex Admin    admin
---   staff@app.test  Sam Staff     staff
---   ada@app.test    Ada Lovelace  member
---   bo@app.test     Bo Diddley    member
+--   admin@app.test    Alex     admin
+--   staff@app.test    Sam      staff
+--   member@app.test   Jordan   member
+--   member2@app.test  Casey    member
 -- Project data production needs too (the current terms, app_settings) is seeded by the migrations, not here.
 -- This file adds people, a few items, and the local contact email.
 
@@ -15,7 +15,7 @@ create schema if not exists seed;
 
 -- A Supabase Auth user plus its member row (created by the auth trigger with the pinned id).
 create or replace function seed.add_member(
-  auth_id uuid, member_id uuid, email text, first_name text, last_name text,
+  auth_id uuid, member_id uuid, email text, display_name text,
   onboarded boolean default true, terms text default null, roles public.app_role[] default '{}',
   joined timestamptz default now() - interval '120 days'
 ) returns uuid language plpgsql as $$
@@ -33,11 +33,10 @@ begin
   update public.members m set created_at = joined where m.id = add_member.member_id;
   if onboarded then
     update public.members m
-       set first_name = add_member.first_name, last_name = add_member.last_name, onboarding_completed_at = joined
+       set display_name = add_member.display_name, onboarded_at = joined
      where m.id = add_member.member_id;
     insert into public.consents (member_id, kind, version, granted, granted_at) values
       (add_member.member_id, 'terms', coalesce(add_member.terms, private.current_terms_version()), true, joined),
-      (add_member.member_id, 'adult', '1.0', true, joined),
       (add_member.member_id, 'marketing', '1.0', false, joined);
   end if;
   insert into public.member_roles (member_id, role) select add_member.member_id, r from unnest(roles) r;
@@ -59,7 +58,7 @@ create or replace function seed.act_as(email text) returns void language sql as 
     select json_build_object('role', 'authenticated', 'sub', u.id)::text from auth.users u where u.email = act_as.email), ''), false);
 $$;
 
--- Put Ada and Bo back to their base-seed state (pgTAP files call this first so they pass on any scenario).
+-- Put the two base members back to their base-seed state (pgTAP files call this first so they pass on any scenario).
 create or replace function seed.reset_base_members() returns void language plpgsql as $$
 declare
   ids uuid[] := array['00000000-0000-4000-9000-0000000000a1', '00000000-0000-4000-9000-0000000000b2']::uuid[];
@@ -70,10 +69,10 @@ begin
 end $$;
 
 -- ─── People ────────────────────────────────────────────────────────────────────────────────────────
-select seed.add_member('00000000-0000-4000-8000-0000000000ad', '00000000-0000-4000-9000-0000000000ad', 'admin@app.test', 'Alex', 'Admin', roles => '{admin}');
-select seed.add_member('00000000-0000-4000-8000-00000000005a', '00000000-0000-4000-9000-00000000005a', 'staff@app.test', 'Sam', 'Staff', roles => '{staff}');
-select seed.add_member('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-9000-0000000000a1', 'ada@app.test', 'Ada', 'Lovelace');
-select seed.add_member('00000000-0000-4000-8000-0000000000b2', '00000000-0000-4000-9000-0000000000b2', 'bo@app.test', 'Bo', 'Diddley');
+select seed.add_member('00000000-0000-4000-8000-0000000000ad', '00000000-0000-4000-9000-0000000000ad', 'admin@app.test', 'Alex', roles => '{admin}');
+select seed.add_member('00000000-0000-4000-8000-00000000005a', '00000000-0000-4000-9000-00000000005a', 'staff@app.test', 'Sam', roles => '{staff}');
+select seed.add_member('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-9000-0000000000a1', 'member@app.test', 'Jordan');
+select seed.add_member('00000000-0000-4000-8000-0000000000b2', '00000000-0000-4000-9000-0000000000b2', 'member2@app.test', 'Casey');
 
 -- ─── Data ──────────────────────────────────────────────────────────────────────────────────────────
 select seed.item('Welcome', 'What this app does, in one line.', E'## Start here\n\nThis item is seed data. Replace the items catalogue with your first real feature.', sort => 0);

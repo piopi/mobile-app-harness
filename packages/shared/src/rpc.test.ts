@@ -6,8 +6,8 @@ describe('RPC input schemas', () => {
     expect(() => rpcInputs.launch_status.parse({ extra: 1 })).toThrow();
   });
   it('validates onboarding', () => {
-    expect(parseRpcInput('complete_onboarding', { first_name: 'Ada', last_name: 'L', terms_version: '1.0', adult: true })).toMatchObject({ adult: true });
-    expect(() => parseRpcInput('complete_onboarding', { first_name: 'Ada', last_name: 'L', terms_version: '1.0', adult: false })).toThrow();
+    expect(parseRpcInput('complete_onboarding', { display_name: 'Jordan', terms_version: '1.0' })).toMatchObject({ display_name: 'Jordan' });
+    expect(() => parseRpcInput('complete_onboarding', { display_name: ' ', terms_version: '1.0' })).toThrow();
   });
   it('takes strict patches for admin edits (absent keeps, null clears)', () => {
     expect(itemPatch.parse({ summary: null })).toEqual({ summary: null });

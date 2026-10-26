@@ -6,7 +6,7 @@ import { useSession } from '../lib/session';
 
 const FIRST_SCREEN = {
   'sign-in': '/welcome',
-  onboarding: '/details',
+  onboarding: '/profile',
   terms: '/terms',
   suspended: '/suspended',
   member: '/home',

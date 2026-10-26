@@ -14,7 +14,7 @@ type ProseBlock =
   | { kind: 'list'; items: ProseInline[][] };
 
 const proseVariants = tv({
-  slots: { root: 'gap-4', item: 'flex-row gap-3', strong: 'font-sans-bold' },
+  slots: { root: 'gap-4', item: 'flex-row gap-3', strong: 'font-bold' },
   variants: {
     /** `framed`: on the surface with padding, for an excerpt inside a form. */
     frame: { none: {}, framed: { root: 'bg-surface border-hairline rounded-lg border px-4 py-5' } },

@@ -1,4 +1,4 @@
-import type { OnboardingDetails } from '@app/shared';
+import type { OnboardingProfile } from '@app/shared';
 import { useSyncExternalStore } from 'react';
 
 /**
@@ -6,9 +6,9 @@ import { useSyncExternalStore } from 'react';
  * sends everything in one `complete_onboarding` call: the gate stays on onboarding until then, so the member is
  * never moved out mid-flow. Memory only: a relaunch starts the form again (the server keeps nothing half-done).
  */
-export type OnboardingDraft = { details: OnboardingDetails | null };
+export type OnboardingDraft = { profile: OnboardingProfile | null };
 
-const EMPTY: OnboardingDraft = { details: null };
+const EMPTY: OnboardingDraft = { profile: null };
 let draft = EMPTY;
 const listeners = new Set<() => void>();
 

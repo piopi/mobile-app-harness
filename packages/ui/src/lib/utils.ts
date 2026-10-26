@@ -7,7 +7,6 @@ import { extendTailwindMerge } from 'tailwind-merge';
 const twMergeConfig = {
   extend: {
     classGroups: {
-      'font-family': [{ font: ['sans', 'sans-medium', 'sans-semibold', 'sans-bold', 'display', 'mono', 'mono-medium'] }],
       rounded: [{ rounded: ['object', 'sheet'] }],
     },
   },

@@ -10,28 +10,27 @@ import { refreshLaunchStatus } from '../../lib/session';
 import { supabase } from '../../lib/supabase';
 
 /**
- * Onboarding 2 / 2: 18+, the current terms (data, terms_versions) and the optional marketing consent. "Finish
- * setup" saves everything in one complete_onboarding call and the gate opens the app.
+ * Onboarding 2 / 2: the current terms (data, terms_versions) and the optional marketing consent. "Finish setup"
+ * saves everything in one complete_onboarding call and the gate opens the app.
  */
 export default function Consent() {
   const draft = useDraft();
   const terms = useCurrentTerms();
-  const [adult, setAdult] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // A relaunch mid-onboarding loses the draft: start again from the details.
-  if (!draft.details && !busy) return <Redirect href="/details" />;
+  // A relaunch mid-onboarding loses the draft: start again from the profile.
+  if (!draft.profile && !busy) return <Redirect href="/profile" />;
 
-  const ready = adult && accepted && !!terms.data && !busy;
+  const ready = accepted && !!terms.data && !busy;
   const finish = async () => {
     if (!ready || !terms.data) return;
     setBusy(true);
     setError(null);
     try {
-      const args = parseRpcInput('complete_onboarding', { ...draft.details, terms_version: terms.data.version, adult: true, marketing });
+      const args = parseRpcInput('complete_onboarding', { ...draft.profile, terms_version: terms.data.version, marketing });
       const { error: rpcError } = await supabase.rpc('complete_onboarding', args);
       if (rpcError) throw rpcError;
       await refreshLaunchStatus();
@@ -47,7 +46,6 @@ export default function Consent() {
     <Screen native testID="onboarding-consent">
       <Text variant="title-1">{ONBOARDING.consentTitle}</Text>
       <Progress step={2} of={2} label={ONBOARDING.consentStep} testID="onboarding-progress" />
-      <Checkbox checked={adult} onCheckedChange={setAdult} emphasis="strong" label={ONBOARDING.adult} description={ONBOARDING.adultDetail} testID="adult" />
       {terms.data ? <TermsAcceptance intro terms={terms.data} accepted={accepted} onAcceptedChange={setAccepted} /> : null}
       <Checkbox checked={marketing} onCheckedChange={setMarketing} label={ONBOARDING.marketing} description={ONBOARDING.marketingDetail} testID="marketing" />
       {error ? (

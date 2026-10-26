@@ -9,7 +9,7 @@ import { Text } from './text';
 const badgeVariants = tv({
   slots: {
     root: 'flex-row items-center gap-1.5 self-start rounded-sm',
-    label: 'font-sans-semibold text-[12px] leading-[16px]',
+    label: 'font-semibold text-[12px] leading-[16px]',
   },
   variants: {
     variant: {

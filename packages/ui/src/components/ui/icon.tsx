@@ -19,9 +19,9 @@ import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
 import { ShieldCheckIcon } from 'phosphor-react-native/src/icons/ShieldCheck';
 import { SignOutIcon } from 'phosphor-react-native/src/icons/SignOut';
 import { GearSixIcon } from 'phosphor-react-native/src/icons/GearSix';
-import { HouseIcon } from 'phosphor-react-native/src/icons/House';
+import { HouseSimpleIcon } from 'phosphor-react-native/src/icons/HouseSimple';
 import { ListBulletsIcon } from 'phosphor-react-native/src/icons/ListBullets';
-import { UserIcon } from 'phosphor-react-native/src/icons/User';
+import { UserCircleIcon } from 'phosphor-react-native/src/icons/UserCircle';
 import * as React from 'react';
 import { View } from 'react-native';
 import { useCSSVariable } from 'uniwind';
@@ -45,9 +45,9 @@ const GLYPHS = {
   ShieldCheck: ShieldCheckIcon,
   SignOut: SignOutIcon,
   GearSix: GearSixIcon,
-  House: HouseIcon,
+  HouseSimple: HouseSimpleIcon,
   ListBullets: ListBulletsIcon,
-  User: UserIcon,
+  UserCircle: UserCircleIcon,
 } satisfies Record<(typeof ICON_GLYPHS)[IconName], unknown>;
 
 /** Same names as Text's tones, plus the fills the icons sit on. */
@@ -76,7 +76,7 @@ type IconProps = {
 };
 
 function Icon({ name, size = 14, tone = 'default', weight, testID }: IconProps) {
-  const color = (useCSSVariable(TONE_VAR[tone]) as string | undefined) ?? '#111111';
+  const color = (useCSSVariable(TONE_VAR[tone]) as string | undefined) ?? '#111827';
   const Glyph = GLYPHS[ICON_GLYPHS[name]];
   return (
     <View

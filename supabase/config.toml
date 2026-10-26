@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "acme"
+project_id = "example-app"
 
 [api]
 enabled = true
@@ -237,13 +237,13 @@ otp_expiry = 600
 
 # Sign-in codes (email one-time code). A new member gets the confirmation email, a returning one the magic-link
 # email. The experimental stack can't serve body templates (`content_path`), and the default bodies carry only a
-# link, so locally the code rides in the subject (subjects are templates too): "123456 is your Acme code".
+# link, so locally the code rides in the subject (subjects are templates too): "123456 is your Example App code".
 # The hosted project sets branded bodies with {{ .Token }} (one line on the human's account checklist).
 [auth.email.template.confirmation]
-subject = "{{ .Token }} is your Acme code"
+subject = "{{ .Token }} is your Example App code"
 
 [auth.email.template.magic_link]
-subject = "{{ .Token }} is your Acme code"
+subject = "{{ .Token }} is your Example App code"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

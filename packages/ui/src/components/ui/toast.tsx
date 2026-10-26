@@ -12,8 +12,8 @@ import { Text } from './text';
 const toastVariants = tv({
   slots: {
     root: 'min-h-[52px] flex-row items-center gap-3 rounded-md px-4 py-3',
-    message: 'font-sans-medium flex-1 text-[15px] leading-[20px]',
-    action: 'font-sans-semibold text-[15px] underline',
+    message: 'font-medium flex-1 text-[15px] leading-[20px]',
+    action: 'font-semibold text-[15px] underline',
   },
   variants: {
     tone: {

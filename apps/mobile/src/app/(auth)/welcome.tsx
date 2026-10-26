@@ -22,11 +22,6 @@ export default function Welcome() {
           <Button block label={LANDING.join} trailing="→" onPress={() => router.push('/sign-up')} testID="landing-join" />
           <Button variant="link" label={LANDING.signIn} onPress={() => router.push('/sign-in')} testID="landing-sign-in" />
         </Stack>
-        <Stack inset="gutter">
-          <Text variant="micro" tone="muted">
-            {LANDING.adults}
-          </Text>
-        </Stack>
       </Stack>
     </Screen>
   );

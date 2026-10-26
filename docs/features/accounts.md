@@ -5,7 +5,7 @@
 ## Capabilities
 
 - Sign in with Apple, Google or an emailed 6-digit code (one flow: a first code creates the account). Dev builds use local stand-ins for Apple and Google; codes land in the stack's Mailpit.
-- Onboarding in two steps (name; 18+, terms, marketing), saved in one `complete_onboarding` call.
+- Onboarding in two steps (profile: a display name and an EXAMPLE optional "about you" field; then the terms and an optional marketing consent), saved in one `complete_onboarding` call. Projects add fields and steps with the recipe in the db-change skill.
 - Account gates from `launch_status()`: signed out, onboarding, terms re-accept, suspended (a hold), member.
 - Profile (Me): appearance (System / Light / Dark; the default is configured), sign out with the branded dialog.
 - Roles: `staff` and `admin` grants, read on every call; JWT claims as UI hints.

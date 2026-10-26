@@ -2,7 +2,7 @@
 appId: ${APP_ID}
 ---
 - runFlow: ../_open.yaml
-- openLink: ${SCHEME}://__agent/sign-in?payload=%7B%22email%22%3A%22ada%40app.test%22%7D
+- openLink: ${SCHEME}://__agent/sign-in?payload=%7B%22email%22%3A%22member%40app.test%22%7D
 - tapOn:
     text: Open
     optional: true

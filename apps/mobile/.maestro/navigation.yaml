@@ -9,7 +9,7 @@ name: Navigation, gates and the dev panel
 - runFlow:
     file: subflows/sign-in-as.yaml
     env:
-      EMAIL_JSON: '%7B%22email%22%3A%22ada%40app.test%22%7D'
+      EMAIL_JSON: '%7B%22email%22%3A%22member%40app.test%22%7D'
 - extendedWaitUntil:
     visible: Harness ready.
     timeout: 30000

@@ -8,7 +8,7 @@ describe('row level security', () => {
   it('a member reads their own member row only; staff read everyone', async () => {
     const member = await asRole('member');
     const { data: mine } = await member.from('members').select('id');
-    expect(mine!.map((m) => m.id)).toEqual([IDS.ada]);
+    expect(mine!.map((m) => m.id)).toEqual([IDS.member]);
     const staff = await asRole('staff');
     const { data: all } = await staff.from('members').select('id');
     expect(all!.length).toBeGreaterThanOrEqual(4);

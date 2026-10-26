@@ -21,8 +21,8 @@ export type Session = {
   isStaff: boolean;
   /** The signed-in account's email ("Signed in as"). */
   email: string | null;
-  /** Name hints from the identity provider (Apple shares one once; Google always), to prefill onboarding. */
-  nameHint: { first: string; last: string } | null;
+  /** A display-name hint from the identity provider (Apple shares one once; Google always), to prefill onboarding. */
+  nameHint: string | null;
   launch: LaunchStatus | null;
   /** Retry after an error. */
   refetch: () => void;
@@ -90,13 +90,7 @@ export function refreshLaunchStatus() {
 function nameHint(session: AuthSession | null): Session['nameHint'] {
   const m = (session?.user.user_metadata ?? {}) as Record<string, unknown>;
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-  const given = str(m.given_name);
-  const family = str(m.family_name);
-  if (given || family) return { first: given, last: family };
-  const full = str(m.full_name) || str(m.name);
-  if (!full) return null;
-  const [first = '', ...rest] = full.split(/\s+/);
-  return { first, last: rest.join(' ') };
+  return str(m.full_name) || str(m.name) || [str(m.given_name), str(m.family_name)].filter(Boolean).join(' ') || null;
 }
 
 export function useSession(): Session {

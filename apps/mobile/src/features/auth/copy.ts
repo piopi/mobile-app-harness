@@ -12,7 +12,6 @@ export const LANDING = {
   line: 'One line on what the app does for the person holding the phone.',
   join: 'Get started',
   signIn: 'I already have an account',
-  adults: 'You must be 18 or older to use this app.',
 } as const;
 
 export const AUTH_HERO = {
@@ -79,22 +78,23 @@ export function isEmailLimit(error: unknown): boolean {
 }
 
 export const ONBOARDING = {
-  detailsTitle: 'About you.',
+  profileTitle: 'Your profile.',
   consentTitle: 'Before you start.',
-  detailsStep: 'Your details',
+  profileStep: 'Profile',
   consentStep: 'Terms',
   signedInAs: (email: string) => `Signed in as ${email}`,
-  firstName: 'First name',
-  lastName: 'Last name',
+  displayName: 'Display name',
+  displayNameHint: 'How you appear in the app.',
+  // EXAMPLE field: replace or delete it with its form field.
+  about: 'About you (optional)',
+  aboutHint: 'A line or two. You can change it later.',
   continue: 'Continue',
-  adult: 'I am 18 or older.',
-  adultDetail: 'Your confirmation is stored with your account.',
   termsTitle: (v: string) => `Terms of use, version ${v}`,
   termsIntro: 'Read the terms before you accept them.',
   openLarger: 'Read the full text',
   marketing: 'Send me product updates.',
   marketingDetail: 'Optional. Unsubscribe at any time.',
-  saveFailed: 'We could not save your details. Try again.',
+  saveFailed: 'We could not save your profile. Try again.',
   finish: 'Finish setup',
 } as const;
 

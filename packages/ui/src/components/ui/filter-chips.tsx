@@ -13,7 +13,7 @@ const filterChipsVariants = tv({
   slots: {
     root: 'flex-row flex-wrap gap-2',
     chip: 'h-11 items-center justify-center rounded-full px-4',
-    label: 'font-sans-medium text-[15px] leading-[20px]',
+    label: 'font-medium text-[15px] leading-[20px]',
   },
   variants: {
     selected: {

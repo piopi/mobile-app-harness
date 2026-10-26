@@ -31,7 +31,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
    pnpm seed onboarding      # prints who to sign in as (password123)
    ```
 
-   Then refetch in the app: `pnpm agent refetch`, or sign in at once: `pnpm agent sign-in '{"email":"olly@app.test"}'`.
+   Then refetch in the app: `pnpm agent refetch`, or sign in at once: `pnpm agent sign-in '{"email":"new@app.test"}'`.
 
 3. **Open a session** (once per slot). Pass this slot's device so you never grab another agent's simulator:
 
@@ -45,7 +45,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
    ```bash
    pnpm exec agent-device snapshot -i --session wt-<k>                    # @refs; give elements testID / accessibilityLabel
    pnpm exec agent-device press @e18 --settle --session wt-<k>
-   pnpm exec agent-device fill @e4 "ada@app.test" --settle --session wt-<k>
+   pnpm exec agent-device fill @e4 "member@app.test" --settle --session wt-<k>
    pnpm exec agent-device wait text "Harness ready." --session wt-<k>     # verify by text, not by eye
    ```
 
@@ -57,7 +57,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
    | `theme` | `{"theme":"light"\|"dark"\|"system"}` | Uniwind theme (not saved, unlike Me → Appearance) |
    | `time-travel` | `{"iso":"2026-10-28T22:10:00Z"}` or `{"offsetMinutes":90}`; none resets | `now()` / `useNow()` shift |
    | `refetch` | none | invalidate every query (after `pnpm seed`) |
-   | `sign-in` | `{"email":"ada@app.test"}` (`password` optional, default password123) | signs in to this slot's stack as a seeded account; the gates follow the database |
+   | `sign-in` | `{"email":"member@app.test"}` (`password` optional, default password123) | signs in to this slot's stack as a seeded account; the gates follow the database |
    | `sign-out` | none | signs out (back to the landing) |
    | `session` | `{"mode":"signed_out"\|"onboarding"\|"terms"\|"suspended"\|"member"}`, `{"roles":["member","staff"]}`, `{"real":true}` | overrides the real session: which gate opens, staff-only UI; `real` drops the override |
    | `demo` | none, or `{"on":false}` | hides the dev-only panels (seeded accounts, the harness card) for demo videos |

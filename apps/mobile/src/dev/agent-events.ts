@@ -35,7 +35,7 @@ export const agentEventPayloads = {
     roles: z.array(memberRole).optional(),
     real: z.literal(true).optional(),
   }),
-  /** Sign in to this slot's stack as a seeded account (password123 unless given): `{"email":"ada@app.test"}`. */
+  /** Sign in to this slot's stack as a seeded account (password123 unless given): `{"email":"member@app.test"}`. */
   'sign-in': z.object({ email: z.email(), password: z.string().min(1).optional() }),
   /** Sign out (Supabase Auth), back to the sign-in gate. */
   'sign-out': z.object({}).optional(),

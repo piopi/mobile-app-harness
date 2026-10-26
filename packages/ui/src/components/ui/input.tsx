@@ -8,14 +8,14 @@ import { Icon, type IconName } from './icon';
 const inputVariants = tv({
   slots: {
     root: 'h-[52px] flex-row items-center gap-3 rounded-md border px-4',
-    field: 'font-sans text-foreground h-full flex-1 text-[17px]',
+    field: 'font-normal text-foreground h-full flex-1 text-[17px]',
   },
   variants: {
     state: { default: { root: 'border-control' }, focused: { root: 'border-foreground' }, error: { root: 'border-danger' } },
     /** `code`: a one-time code, large tracked mono digits in the middle of a taller field. */
     kind: {
       text: {},
-      code: { root: 'h-16', field: 'font-mono-medium text-center text-[28px] tracking-[10px]' },
+      code: { root: 'h-16', field: 'font-medium text-center text-[28px] tracking-[10px]' },
       /** `multiline`: a few lines of free text, top-aligned in a taller field. */
       multiline: { root: 'h-[120px] items-start py-3', field: 'text-[17px] leading-[22px]' },
     },

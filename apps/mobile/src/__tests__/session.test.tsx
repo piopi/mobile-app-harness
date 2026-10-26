@@ -28,11 +28,11 @@ describe('session', () => {
   });
 
   it('takes the gate, roles and email from launch_status', async () => {
-    launch({ mode: 'member', member_id: '00000000-0000-4000-9000-0000000000a1', email: 'ada@app.test', roles: ['member', 'staff'] });
+    launch({ mode: 'member', member_id: '00000000-0000-4000-9000-0000000000a1', email: 'member@app.test', roles: ['member', 'staff'] });
     const { result } = await renderHook(() => useSession(), { wrapper });
-    await act(() => emitAuth('SIGNED_IN', fakeSession('ada@app.test')));
+    await act(() => emitAuth('SIGNED_IN', fakeSession('member@app.test')));
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    expect(result.current).toMatchObject({ mode: 'member', isStaff: true, email: 'ada@app.test' });
+    expect(result.current).toMatchObject({ mode: 'member', isStaff: true, email: 'member@app.test' });
     expect(supabase.rpc).toHaveBeenCalledWith('launch_status');
   });
 
@@ -47,9 +47,9 @@ describe('session', () => {
     launch({ mode: 'onboarding' });
     const { result } = await renderHook(() => useSession(), { wrapper });
     await act(() => emitAuth('SIGNED_IN', fakeSession('g@app.test', { full_name: 'Gale Q Google' })));
-    expect(result.current.nameHint).toEqual({ first: 'Gale', last: 'Q Google' });
+    expect(result.current.nameHint).toBe('Gale Q Google');
     await act(() => emitAuth('SIGNED_IN', fakeSession('a@app.test', { given_name: 'Avery', family_name: 'Apple' })));
-    expect(result.current.nameHint).toEqual({ first: 'Avery', last: 'Apple' });
+    expect(result.current.nameHint).toBe('Avery Apple');
   });
 
   it('is overridden by the dev-only __agent/session event, and {"real":true} removes it', async () => {

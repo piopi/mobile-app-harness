@@ -10,5 +10,5 @@ appId: ${APP_ID}
     optional: true
 - extendedWaitUntil:
     visible:
-      id: '(landing-screen|sign-in-screen|home-screen|onboarding-details|terms-screen|suspended-screen)'
+      id: '(landing-screen|sign-in-screen|home-screen|onboarding-profile|terms-screen|suspended-screen)'
     timeout: 60000

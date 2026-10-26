@@ -14,7 +14,7 @@ export const States: Story = {
         <Input placeholder="you@example.com" />
       </Field>
       <Field label="Email" error="Enter a valid email address.">
-        <Input state="error" value="ada@" />
+        <Input state="error" value="jordan@" />
       </Field>
     </Stack>
   ),

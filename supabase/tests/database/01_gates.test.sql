@@ -6,11 +6,11 @@ select plan(16);
 create function pg_temp.login(who text) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('role', 'authenticated', 'sub', case who
     when 'admin' then '00000000-0000-4000-8000-0000000000ad' when 'staff' then '00000000-0000-4000-8000-00000000005a'
-    when 'ada' then '00000000-0000-4000-8000-0000000000a1' when 'new' then '00000000-0000-4000-8000-0000000000f1' end)::text, true);
+    when 'member' then '00000000-0000-4000-8000-0000000000a1' when 'new' then '00000000-0000-4000-8000-0000000000f1' end)::text, true);
 $$;
 
 select seed.reset_base_members();
-select seed.add_member('00000000-0000-4000-8000-0000000000f1', '00000000-0000-4000-9000-0000000000f1', 'f1@app.test', null, null, onboarded => false, joined => now());
+select seed.add_member('00000000-0000-4000-8000-0000000000f1', '00000000-0000-4000-9000-0000000000f1', 'f1@app.test', null, onboarded => false, joined => now());
 
 -- ─── Modes ─────────────────────────────────────────────────────────────────────────────────────────
 set local role anon;
@@ -19,12 +19,12 @@ reset role;
 set local role authenticated;
 select pg_temp.login('new');
 select is(public.launch_status() ->> 'mode', 'onboarding', 'a new account onboards first');
-select throws_ok($$select public.complete_onboarding('Fi', 'One', '0.1', true)$$, 'P0001', 'terms_version_mismatch', 'onboarding needs the current terms');
-select throws_ok($$select public.complete_onboarding('Fi', 'One', (select version from public.terms_versions where is_current), false)$$, 'P0001', 'adult_required', 'onboarding needs 18+');
-select is(public.complete_onboarding('Fi', 'One', (select version from public.terms_versions where is_current), true) ->> 'mode', 'member', 'onboarding opens the app');
+select throws_ok($$select public.complete_onboarding('Fi', '0.1')$$, 'P0001', 'terms_version_mismatch', 'onboarding needs the current terms');
+select throws_ok($$select public.complete_onboarding(' ', (select version from public.terms_versions where is_current))$$, 'P0001', 'name_required', 'onboarding needs a display name');
+select is(public.complete_onboarding('Fi', (select version from public.terms_versions where is_current), about => 'Hi.') ->> 'mode', 'member', 'onboarding opens the app');
 
-select pg_temp.login('ada');
-select is(public.launch_status() ->> 'mode', 'member', 'Ada is a member');
+select pg_temp.login('member');
+select is(public.launch_status() ->> 'mode', 'member', 'a base member is in the app');
 select is(public.launch_status() -> 'roles', '["member"]'::jsonb, 'with the member role only');
 
 -- ─── Roles and admin RPCs ──────────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ select throws_ok($$select public.update_item(gen_random_uuid(), '{"colour":"red"
 select lives_ok($$select public.publish_terms_version('9.9', 'Terms', '# Terms', 'I accept 9.9.', array['Everything'])$$, 'an admin publishes terms');
 
 -- ─── Terms re-accept ───────────────────────────────────────────────────────────────────────────────
-select pg_temp.login('ada');
+select pg_temp.login('member');
 select is(public.launch_status() ->> 'mode', 'terms', 'a new version opens the re-accept gate');
 select is(public.launch_status() -> 'terms' -> 'changes', '["Everything"]'::jsonb, 'with what changed');
 select is(public.accept_terms('9.9') ->> 'mode', 'member', 'accepting reopens the app');

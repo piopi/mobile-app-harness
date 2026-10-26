@@ -1,10 +1,10 @@
 {
   "identity": {
-    "name": "Acme",
-    "slug": "acme",
-    "scheme": "acme",
-    "bundleId": "com.example.acme",
-    "androidPackage": "com.example.acme",
+    "name": "Example App",
+    "slug": "example-app",
+    "scheme": "exampleapp",
+    "bundleId": "com.example.app",
+    "androidPackage": "com.example.app",
     "repo": "piopi/mobile-app-harness"
   },
   "icons": {

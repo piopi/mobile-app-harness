@@ -14,7 +14,7 @@ select policies_are('public', 'terms_versions', array['terms_versions_select']);
 
 select ok(not has_table_privilege('authenticated', 'public.items', 'insert'), 'clients cannot insert items directly');
 select ok(not has_table_privilege('authenticated', 'public.consents', 'insert'), 'clients cannot write consents directly');
-select ok(has_column_privilege('authenticated', 'public.members', 'first_name', 'update'), 'members may edit their own name');
+select ok(has_column_privilege('authenticated', 'public.members', 'display_name', 'update'), 'members may edit their own display name');
 select ok(not has_function_privilege('authenticated', 'private.require_member(boolean, boolean)', 'execute'), 'private helpers are not callable');
 select ok(not has_function_privilege('anon', 'public.create_item(text, text, text, boolean, integer)', 'execute'), 'anon cannot call admin RPCs');
 

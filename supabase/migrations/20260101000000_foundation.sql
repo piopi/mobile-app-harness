@@ -17,7 +17,7 @@ revoke all on schema private from public, anon, authenticated;
 -- `member` is implicit (every member row); the others are grants in member_roles.
 create type public.app_role as enum ('member', 'staff', 'admin');
 create type public.member_status as enum ('active', 'suspended');
-create type public.consent_kind as enum ('terms', 'adult', 'marketing');
+create type public.consent_kind as enum ('terms', 'marketing');
 create type public.item_status as enum ('draft', 'published', 'archived');
 
 -- ─── Members ───────────────────────────────────────────────────────────────────────────────────────
@@ -26,10 +26,13 @@ create table public.members (
   -- The Supabase Auth identity. The member id stays the only id the app uses (members.id is not auth.uid()).
   auth_user_id uuid not null unique references auth.users (id) on delete cascade,
   email text,
-  first_name text check (first_name is null or char_length(first_name) between 1 and 60),
-  last_name text check (last_name is null or char_length(last_name) between 1 and 60),
+  -- The generic profile: a display name, and when the account was created and finished onboarding.
+  display_name text check (display_name is null or char_length(display_name) between 1 and 60),
+  -- PROJECT: EXAMPLE onboarding field, optional. Replace or delete it (and its zod schema, form field and the
+  -- complete_onboarding argument); the recipe is in the db-change skill, "Add an onboarding field or step".
+  about text check (about is null or char_length(about) <= 280),
   status public.member_status not null default 'active',
-  onboarding_completed_at timestamptz,
+  onboarded_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -282,7 +285,7 @@ begin
   if m.status <> 'active' then
     perform private.forbid('suspended');
   end if;
-  if require_member.onboarded and m.onboarding_completed_at is null then
+  if require_member.onboarded and m.onboarded_at is null then
     perform private.fail('onboarding_required', 'Finish setting up your account first.');
   end if;
   if require_member.current_terms and not exists (
@@ -346,6 +349,8 @@ $$;
 -- ─── Launch status: which account gate the app opens ───────────────────────────────────────────────
 -- One call on launch (and after anything that can move the member): the gate (`mode`) and what the gates show.
 -- Modes, in order: signed_out, suspended, onboarding, terms (a new version to accept), member.
+-- PROJECT: an onboarding step that must be complete before the app opens adds its check to the `onboarding`
+-- case below (for example `or m.<column> is null`).
 create function public.launch_status()
 returns jsonb
 language plpgsql
@@ -369,14 +374,14 @@ begin
   select c.version into accepted from public.consents c where c.member_id = m.id and c.kind = 'terms' and c.granted;
   mode := case
     when m.status = 'suspended' then 'suspended'
-    when m.onboarding_completed_at is null then 'onboarding'
+    when m.onboarded_at is null then 'onboarding'
     when accepted is distinct from current then 'terms'
     else 'member' end;
   return jsonb_build_object(
     'mode', mode,
     'member_id', m.id,
     'email', m.email,
-    'first_name', m.first_name,
+    'display_name', m.display_name,
     'contact_email', (select s.contact_email from public.app_settings s),
     'roles', to_jsonb(public.my_roles()),
     'is_staff', public.is_staff(),
@@ -389,9 +394,11 @@ end;
 $$;
 
 -- ─── Member RPCs ───────────────────────────────────────────────────────────────────────────────────
--- Onboarding in one call: the name, 18+, the current terms and the optional marketing consent. The gate stays on
--- onboarding until this succeeds, so nothing is ever half-saved.
-create function public.complete_onboarding(first_name text, last_name text, terms_version text, adult boolean, marketing boolean default false)
+-- Onboarding in one call: the display name, the current terms, the optional marketing consent, and the EXAMPLE
+-- `about` field. The gate stays on onboarding until this succeeds, so nothing is ever half-saved.
+-- PROJECT: a new onboarding field is a column above, an argument here (validated here, saved in the update),
+-- a key in `onboardingProfile` (packages/shared) and a field or step in apps/mobile/src/app/(onboarding).
+create function public.complete_onboarding(display_name text, terms_version text, marketing boolean default false, about text default null)
 returns jsonb
 language plpgsql
 security definer
@@ -402,23 +409,23 @@ declare
   m public.members;
 begin
   m := private.require_member(onboarded => false, current_terms => false);
-  if nullif(btrim(complete_onboarding.first_name), '') is null or nullif(btrim(complete_onboarding.last_name), '') is null then
-    perform private.fail('name_required', 'Enter your first and last name.');
-  end if;
-  if not coalesce(complete_onboarding.adult, false) then
-    perform private.fail('adult_required', 'You must be 18 or older.');
+  if nullif(btrim(complete_onboarding.display_name), '') is null then
+    perform private.fail('name_required', 'Enter a display name.');
   end if;
   if complete_onboarding.terms_version is distinct from private.current_terms_version() then
     perform private.fail('terms_version_mismatch', 'The terms changed while you were reading. Read the new version.');
   end if;
-  update public.members set
-    first_name = btrim(complete_onboarding.first_name),
-    last_name = btrim(complete_onboarding.last_name),
-    onboarding_completed_at = coalesce(onboarding_completed_at, now())
-   where id = m.id;
+  begin
+    update public.members set
+      display_name = btrim(complete_onboarding.display_name),
+      about = nullif(btrim(complete_onboarding.about), ''),
+      onboarded_at = coalesce(onboarded_at, now())
+     where id = m.id;
+  exception when check_violation then
+    perform private.fail('invalid_profile', 'One of the values is too long.');
+  end;
   insert into public.consents (member_id, kind, version, granted) values
     (m.id, 'terms', complete_onboarding.terms_version, true),
-    (m.id, 'adult', '1.0', true),
     (m.id, 'marketing', '1.0', coalesce(complete_onboarding.marketing, false))
   on conflict (member_id, kind) do update set version = excluded.version, granted = excluded.granted, granted_at = now();
   return public.launch_status();
@@ -680,10 +687,10 @@ alter table public.app_settings enable row level security;
 alter table public.items enable row level security;
 alter table public.audit_log enable row level security;
 
--- Clients never write tables directly, except a member's own name (column grant below). Everything else is an RPC.
+-- Clients never write tables directly, except a member's own profile (column grant below). Everything else is an RPC.
 revoke insert, update, delete, truncate on all tables in schema public from anon, authenticated;
 revoke all on all tables in schema public from anon;
-grant update (first_name, last_name) on public.members to authenticated;
+grant update (display_name, about) on public.members to authenticated;
 -- The current terms are public (signed-out screens may show them).
 grant select on public.terms_versions to anon;
 
@@ -719,7 +726,7 @@ revoke execute on all functions in schema public from public, anon;
 grant execute on function public.launch_status() to anon, authenticated;
 grant execute on function
   public.current_member_id(), public.has_role(public.app_role), public.is_staff(), public.is_admin(), public.my_roles(),
-  public.complete_onboarding(text, text, text, boolean, boolean), public.accept_terms(text),
+  public.complete_onboarding(text, text, boolean, text), public.accept_terms(text),
   public.publish_terms_version(text, text, text, text, text[]), public.update_app_settings(jsonb),
   public.create_item(text, text, text, boolean, integer), public.update_item(uuid, jsonb),
   public.grant_role(uuid, public.app_role), public.revoke_role(uuid, public.app_role),

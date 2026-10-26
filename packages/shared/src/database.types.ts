@@ -113,14 +113,14 @@ isOneToOne: false
                   ]
                 },"members": {
                   Row: {
-                    "auth_user_id": string,"created_at": string,"email": string | null,"first_name": string | null,"id": string,"last_name": string | null,"onboarding_completed_at": string | null,"status": Database["public"]['Enums']["member_status"],"updated_at": string
+                    "about": string | null,"auth_user_id": string,"created_at": string,"display_name": string | null,"email": string | null,"id": string,"onboarded_at": string | null,"status": Database["public"]['Enums']["member_status"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "auth_user_id": string,"created_at"?: string,"email"?: string | null,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"onboarding_completed_at"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"updated_at"?: string
+                    "about"?: string | null,"auth_user_id": string,"created_at"?: string,"display_name"?: string | null,"email"?: string | null,"id"?: string,"onboarded_at"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"updated_at"?: string
                   }
                   Update: {
-                    "auth_user_id"?: string,"created_at"?: string,"email"?: string | null,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"onboarding_completed_at"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"updated_at"?: string
+                    "about"?: string | null,"auth_user_id"?: string,"created_at"?: string,"display_name"?: string | null,"email"?: string | null,"id"?: string,"onboarded_at"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -149,7 +149,7 @@ isOneToOne: false
 { Args: { "version": string }; Returns: Json
                            },
 "complete_onboarding":
-{ Args: { "adult": boolean,"first_name": string,"last_name": string,"marketing"?: boolean,"terms_version": string }; Returns: Json
+{ Args: { "about"?: string,"display_name": string,"marketing"?: boolean,"terms_version": string }; Returns: Json
                            },
 "create_item":
 { Args: { "body"?: string,"publish"?: boolean,"sort"?: number,"summary"?: string,"title": string }; Returns: {
@@ -250,7 +250,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "app_role": "member"|"staff"|"admin","consent_kind": "terms"|"adult"|"marketing","item_status": "draft"|"published"|"archived","member_status": "active"|"suspended"
+            "app_role": "member"|"staff"|"admin","consent_kind": "terms"|"marketing","item_status": "draft"|"published"|"archived","member_status": "active"|"suspended"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -366,7 +366,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "app_role": ["member", "staff", "admin"],"consent_kind": ["terms", "adult", "marketing"],"item_status": ["draft", "published", "archived"],"member_status": ["active", "suspended"]
+            "app_role": ["member", "staff", "admin"],"consent_kind": ["terms", "marketing"],"item_status": ["draft", "published", "archived"],"member_status": ["active", "suspended"]
           }
         }
 } as const

@@ -7,7 +7,7 @@ import { Text } from './text';
 const avatarVariants = tv({
   slots: {
     root: 'items-center justify-center overflow-hidden rounded-full bg-surface',
-    initials: 'font-sans-bold text-foreground',
+    initials: 'font-bold text-foreground',
   },
   variants: {
     size: {

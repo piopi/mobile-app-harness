@@ -45,7 +45,7 @@ const buttonVariants = tv({
 });
 
 const buttonTextVariants = tv({
-  base: 'font-sans-semibold text-[16px] leading-[20px]',
+  base: 'font-semibold text-[16px] leading-[20px]',
   variants: {
     variant: {
       primary: 'text-primary-foreground',

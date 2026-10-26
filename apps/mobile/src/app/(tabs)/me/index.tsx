@@ -1,4 +1,4 @@
-import { shortName } from '@app/shared';
+import { displayName } from '@app/shared';
 import { ActionSheet, Avatar, Badge, ListRow, Screen, SectionHeader, Stack, Text } from '@app/ui';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ export default function Me() {
   const { launch, email, roles } = useSession();
   const appearance: AppearanceChoice = hasAdaptiveThemes ? 'system' : (theme as AppearanceChoice);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
-  const name = shortName(launch?.first_name ?? null, null, email ?? ME.member);
+  const name = displayName(launch?.display_name, email ?? ME.member);
 
   return (
     <Screen native testID="me-screen">

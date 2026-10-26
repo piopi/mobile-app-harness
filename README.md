@@ -1,4 +1,4 @@
-# Acme
+# Example App
 
 PROJECT: one paragraph on the app for humans. Until then: this repo was made from [piopi/mobile-app-harness](https://github.com/piopi/mobile-app-harness), a template for Expo + Supabase mobile apps built mostly by AI agents working in parallel git worktrees.
 
@@ -49,7 +49,7 @@ pnpm seed onboarding   # load a scenario (run `pnpm seed` to list them)
 pnpm wt down           # release the slot
 ```
 
-Seeded accounts (password `password123`): `admin@app.test`, `staff@app.test`, `ada@app.test` and `bo@app.test` (members). Each scenario's first line names who to sign in as. In a dev build they are listed under the sign-in form (one tap), Sign in with Apple and Google are local stand-in accounts, and an email sign-in code arrives in this stack's Mailpit (`MAILPIT_URL` in `.env.local`, code in the subject). Me → Dev panel flips the dev-only states and opens Storybook.
+Seeded accounts (password `password123`): `admin@app.test`, `staff@app.test`, `member@app.test` and `member2@app.test` (members). Each scenario's first line names who to sign in as. In a dev build they are listed under the sign-in form (one tap), Sign in with Apple and Google are local stand-in accounts, and an email sign-in code arrives in this stack's Mailpit (`MAILPIT_URL` in `.env.local`, code in the subject). Me → Dev panel flips the dev-only states and opens Storybook.
 
 ## Checks
 

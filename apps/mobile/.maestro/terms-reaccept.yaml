@@ -8,7 +8,7 @@ name: Terms re-accept gate
 - runFlow:
     file: subflows/sign-in-as.yaml
     env:
-      EMAIL_JSON: '%7B%22email%22%3A%22ada%40app.test%22%7D'
+      EMAIL_JSON: '%7B%22email%22%3A%22member%40app.test%22%7D'
 - extendedWaitUntil:
     visible: The terms have a new version.
     timeout: 15000

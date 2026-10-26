@@ -8,7 +8,7 @@
 //
 // Self-contained on purpose (only node and git): it must run in any repo, including one not made from the template.
 // Files are compared after mapping each side's identity (harness.config.json: name, slug, scheme, bundle ids,
-// workspace scope, GitHub repo, home dir) to neutral tokens, so "acme" vs "myapp" is not a difference. The paths
+// workspace scope, GitHub repo, home dir) to neutral tokens, so "exampleapp" vs "myapp" is not a difference. The paths
 // compared are the template's harness.manifest.json. Blocks between <!-- PROJECT:<name> --> and <!-- /PROJECT -->
 // belong to the project and are ignored.
 import { execFileSync, spawnSync } from 'node:child_process';

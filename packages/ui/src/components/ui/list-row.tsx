@@ -19,7 +19,7 @@ const listRowVariants = tv({
     /** Muted, greyscale rows: the past, sold out, archived. */
     archived: { true: { root: 'opacity-55' }, false: {} },
     /** The viewer's own row in a shared list: a surface shift and a bold title, never colour alone. */
-    highlight: { true: { root: 'bg-surface px-3', title: 'font-sans-bold' }, false: {} },
+    highlight: { true: { root: 'bg-surface px-3', title: 'font-bold' }, false: {} },
   },
   defaultVariants: { divider: true, density: 'regular', archived: false, highlight: false },
 });
@@ -72,7 +72,7 @@ function ListRow({ title, subtitle, leading, trailing, arrow, onPress, testID, d
 function ListRowDate({ day, month }: { day: string | number; month: string }) {
   return (
     <View className="w-10 items-start">
-      <Text variant="title-3" className="font-sans-medium">
+      <Text variant="title-3" className="font-medium">
         {String(day)}
       </Text>
       <Text variant="micro" tone="muted">

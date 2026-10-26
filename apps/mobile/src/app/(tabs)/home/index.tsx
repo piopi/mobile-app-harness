@@ -24,7 +24,7 @@ export default function Home() {
           <Text variant="kicker" tone="muted">
             {APP_NAME}
           </Text>
-          <Text variant="display">{launch?.first_name ? `Hello, ${launch.first_name}.` : 'Hello.'}</Text>
+          <Text variant="display">{launch?.display_name ? `Hello, ${launch.display_name}.` : 'Hello.'}</Text>
           <Text variant="body" testID="harness-ready">
             Harness ready.
           </Text>

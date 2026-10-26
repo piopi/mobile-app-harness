@@ -10,27 +10,27 @@ beforeEach(() => resetAgentStateForTests());
 
 describe('agent links', () => {
   it('parses full URLs and bare paths with a JSON payload', () => {
-    expect(parseAgentLink('acme://__agent/offline')).toEqual({ event: 'offline', payload: undefined });
+    expect(parseAgentLink('exampleapp://__agent/offline')).toEqual({ event: 'offline', payload: undefined });
     expect(parseAgentLink('/__agent/theme?payload=%7B%22theme%22%3A%22dark%22%7D')).toEqual({
       event: 'theme',
       payload: { theme: 'dark' },
     });
-    expect(parseAgentLink('acme://items/12')).toBeNull();
+    expect(parseAgentLink('exampleapp://items/12')).toBeNull();
   });
 
   it('is ignored in release builds', () => {
     const e = effects();
-    expect(handleAgentLink('acme://__agent/offline', false)).toBe(false);
+    expect(handleAgentLink('exampleapp://__agent/offline', false)).toBe(false);
     expect(getAgentState().offline).toBe(false);
     expect(e.setOnline).not.toHaveBeenCalled();
   });
 
   it('flips offline and back in dev builds', () => {
     const e = effects();
-    expect(handleAgentLink('acme://__agent/offline', true)).toBe(true);
+    expect(handleAgentLink('exampleapp://__agent/offline', true)).toBe(true);
     expect(getAgentState()).toMatchObject({ offline: true, lastEvent: 'offline' });
     expect(e.setOnline).toHaveBeenLastCalledWith(false);
-    handleAgentLink('acme://__agent/online', true);
+    handleAgentLink('exampleapp://__agent/online', true);
     expect(getAgentState().offline).toBe(false);
   });
 
@@ -66,8 +66,8 @@ describe('sign-in agent events', () => {
   it('signs in to a seeded account and out again', () => {
     const e = { setTheme: jest.fn(), setOnline: jest.fn(), refetch: jest.fn(), signIn: jest.fn(), signOut: jest.fn() };
     registerAgentEffects(e);
-    expect(handleAgentLink('acme://__agent/sign-in?payload=%7B%22email%22%3A%22ada%40app.test%22%7D', true)).toBe(true);
-    expect(e.signIn).toHaveBeenCalledWith('ada@app.test', undefined);
+    expect(handleAgentLink('exampleapp://__agent/sign-in?payload=%7B%22email%22%3A%22member%40app.test%22%7D', true)).toBe(true);
+    expect(e.signIn).toHaveBeenCalledWith('member@app.test', undefined);
     expect(dispatchAgentEvent('sign-in', { email: 'not-an-email' })).toBe(false);
     expect(dispatchAgentEvent('sign-out', undefined)).toBe(true);
     expect(e.signOut).toHaveBeenCalled();

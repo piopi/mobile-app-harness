@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { detailsProblems, formatCountdown, gateFor, normaliseOtp, otpCode, providerMode, resendSecondsLeft, signInEmail } from './auth';
+import { profileProblems, formatCountdown, gateFor, normaliseOtp, otpCode, providerMode, resendSecondsLeft, signInEmail } from './auth';
 import { launchMode } from './rpc';
 
 describe('sign-in email', () => {
   it('trims and lower-cases', () => {
-    expect(signInEmail.parse('  Ada@App.Test ')).toBe('ada@app.test');
+    expect(signInEmail.parse('  Jordan@App.Test ')).toBe('jordan@app.test');
   });
   it('refuses something that is not an email', () => {
-    expect(signInEmail.safeParse('ada').success).toBe(false);
+    expect(signInEmail.safeParse('jordan').success).toBe(false);
   });
 });
 
@@ -27,10 +27,10 @@ describe('one-time code', () => {
   });
 });
 
-describe('onboarding details', () => {
-  it('passes complete details and names missing ones', () => {
-    expect(detailsProblems({ first_name: 'Ada', last_name: 'Lovelace' })).toEqual({});
-    expect(detailsProblems({ first_name: ' ', last_name: 'Lovelace' })).toEqual({ first_name: 'missing' });
+describe('onboarding profile', () => {
+  it('passes a display name and names a missing one', () => {
+    expect(profileProblems({ display_name: 'Jordan' })).toEqual({});
+    expect(profileProblems({ display_name: ' ' })).toEqual({ display_name: 'missing' });
   });
 });
 

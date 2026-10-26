@@ -21,7 +21,7 @@ description: >-
 _layout.tsx              root Stack: Providers, ThemeProvider, StatusBar/NavigationBar, the account gates
 index.tsx                the anchor "/": never guarded, redirects to the open gate's first screen
 (auth)/                  gate signed_out: _layout (Stack, opaque header), welcome (landing), sign-in, sign-up, verify (code)
-(onboarding)/            gate onboarding (details, consent) | terms (re-accept)
+(onboarding)/            gate onboarding (profile, consent) | terms (re-accept); a PROJECT slot: add steps with the db-change recipe
 terms-text.tsx           the full terms, a modal over either onboarding gate
 suspended.tsx            gate suspended (a hold screen)
 (tabs)/_layout.tsx       gate member: NativeTabs (Home, Items, Me)
@@ -35,14 +35,15 @@ storybook.tsx, +native-intent.tsx   dev catalog; link rewriting (agent and story
   Supabase Auth session, then `launch_status().mode` and roles). Exactly one gate is open; none while the session
   loads (the splash stays up). When a gate closes under the user, Expo Router falls back to the anchor
   (`index.tsx`), which redirects to the open gate; so no gate may own `/` (a group `index.tsx`) itself. Sign in
-  for real in dev with `pnpm agent sign-in '{"email":"ada@app.test"}'` (seeded accounts, password123), or lay an
+  for real in dev with `pnpm agent sign-in '{"email":"member@app.test"}'` (seeded accounts, password123), or lay an
   override on top: `pnpm agent session '{"mode":"terms"}'` (or `{"roles":["member","staff"]}`; `{"real":true}`
   drops it). A form stack uses `useStackTheme({ header: 'opaque' })`.
 - **Where a new screen goes**: a page inside a tab → that tab's folder (it pushes on the tab's Stack and keeps
   the bar; declare its `Stack.Screen` options in the folder's `_layout.tsx`). A task that covers the tabs → a
   root route with `presentation` (`modal`, `formSheet`, `fullScreenModal`). A new account state → a new mode in
   `launch_status()` and a new `Stack.Protected` gate. A deep link → a route at its path, rewritten in
-  `+native-intent.tsx` only if the URL shape differs. A new tab → a folder in `(tabs)`, a row in its `TABS`, a
+  `+native-intent.tsx` only if the URL shape differs. A new onboarding field or step → the db-change skill,
+  "Add an onboarding field or step" (column, RPC argument, `launch_status` check, zod schema, screen). A new tab → a folder in `(tabs)`, a row in its `TABS`, a
   glyph in `packages/ui/src/lib/icons.ts`, then `pnpm --filter @app/ui tab-icons`.
 - **Headers** are native: `title`, `headerLargeTitleEnabled` (tab roots), and buttons through `Stack.Screen`
   options (`headerRight`). No hand-made header rows. Hrefs are typed (`experiments.typedRoutes`): a wrong path

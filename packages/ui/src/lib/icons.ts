@@ -23,9 +23,9 @@ export const ICON_GLYPHS = {
   'sign-out': 'SignOut',
   gear: 'GearSix',
   // Tabs
-  home: 'House',
+  home: 'HouseSimple',
   items: 'ListBullets',
-  me: 'User',
+  me: 'UserCircle',
 } as const;
 
 export type IconName = keyof typeof ICON_GLYPHS;

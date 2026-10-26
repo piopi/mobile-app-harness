@@ -54,18 +54,18 @@ describe('Sign in and sign up', () => {
 
   it('asks for a valid address, then sends a code and moves to the code step', async () => {
     await renderWithClient(<SignIn />);
-    await fireEvent.changeText(screen.getByTestId('email-input'), 'ada');
+    await fireEvent.changeText(screen.getByTestId('email-input'), 'member');
     await fireEvent.press(screen.getByTestId('email-submit'));
     expect(screen.getByTestId('email-field-error')).toHaveTextContent('Enter a valid email address.');
-    await fireEvent.changeText(screen.getByTestId('email-input'), ' Ada@app.TEST ');
+    await fireEvent.changeText(screen.getByTestId('email-input'), ' Member@App.TEST ');
     await fireEvent.press(screen.getByTestId('email-submit'));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith({ pathname: '/verify', params: expect.objectContaining({ email: 'ada@app.test', mode: 'sign-in', notice: 'sent' }) }));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith({ pathname: '/verify', params: expect.objectContaining({ email: 'member@app.test', mode: 'sign-in', notice: 'sent' }) }));
   });
 
   it('goes to the code step anyway when codes are limited for that address', async () => {
     supabase.auth.signInWithOtp.mockResolvedValueOnce({ data: null, error: { code: 'over_email_send_rate_limit' } });
     await renderWithClient(<SignUp />);
-    await fireEvent.changeText(screen.getByTestId('email-input'), 'ada@app.test');
+    await fireEvent.changeText(screen.getByTestId('email-input'), 'member@app.test');
     await fireEvent.press(screen.getByTestId('email-submit'));
     await waitFor(() => expect(router.push).toHaveBeenCalledWith({ pathname: '/verify', params: expect.objectContaining({ notice: 'limit', mode: 'sign-up' }) }));
   });
@@ -80,15 +80,15 @@ describe('Sign in and sign up', () => {
 
 describe('Code step', () => {
   beforeEach(() => {
-    mockParams = { email: 'ada@app.test', mode: 'sign-in', notice: 'sent', sentAt: String(Date.now()) };
+    mockParams = { email: 'member@app.test', mode: 'sign-in', notice: 'sent', sentAt: String(Date.now()) };
   });
 
   it('says where the code went and submits itself at six digits', async () => {
     await renderWithClient(<Verify />);
-    expect(screen.getByTestId('verify-notice')).toHaveTextContent('We sent a 6-digit code to ada@app.test. It expires in 10 minutes.');
+    expect(screen.getByTestId('verify-notice')).toHaveTextContent('We sent a 6-digit code to member@app.test. It expires in 10 minutes.');
     expect(screen.getByTestId('resend-countdown')).toHaveTextContent(/New code in 0:(30|29)/);
     await fireEvent.changeText(screen.getByTestId('code-input'), '123 456');
-    expect(supabase.auth.verifyOtp).toHaveBeenCalledWith({ email: 'ada@app.test', token: '123456', type: 'email' });
+    expect(supabase.auth.verifyOtp).toHaveBeenCalledWith({ email: 'member@app.test', token: '123456', type: 'email' });
   });
 
   it('says when a code is wrong or too short', async () => {
@@ -102,9 +102,9 @@ describe('Code step', () => {
 
   it('uses the sign-up copy and offers a new code after the wait', async () => {
     jest.useFakeTimers();
-    mockParams = { email: 'ada@app.test', mode: 'sign-up', notice: 'limit', sentAt: String(Date.now() - 31_000) };
+    mockParams = { email: 'member@app.test', mode: 'sign-up', notice: 'limit', sentAt: String(Date.now() - 31_000) };
     await renderWithClient(<Verify />);
-    expect(screen.getByTestId('verify-notice')).toHaveTextContent('We can’t send another code to ada@app.test right now. Use the last code we sent.');
+    expect(screen.getByTestId('verify-notice')).toHaveTextContent('We can’t send another code to member@app.test right now. Use the last code we sent.');
     expect(screen.getByText('Create account')).toBeTruthy();
     await act(() => jest.advanceTimersByTime(1000));
     await fireEvent.press(screen.getByTestId('resend-code'));

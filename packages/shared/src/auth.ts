@@ -30,26 +30,26 @@ export function formatCountdown(seconds: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-/** Onboarding: the member's name (the same rules as editing the profile). */
-export const onboardingDetails = profileUpdate;
-export type OnboardingDetails = z.infer<typeof onboardingDetails>;
-export type OnboardingDetailsField = keyof OnboardingDetails;
+/** Onboarding: the profile (the same rules as editing it later). */
+export const onboardingProfile = profileUpdate;
+export type OnboardingProfile = z.infer<typeof onboardingProfile>;
+export type OnboardingProfileField = keyof OnboardingProfile;
 
 /** The first problem with each field, or an empty object when the details are complete. */
-export function detailsProblems(input: Partial<Record<OnboardingDetailsField, string>>): Partial<Record<OnboardingDetailsField, 'missing' | 'invalid'>> {
-  const out: Partial<Record<OnboardingDetailsField, 'missing' | 'invalid'>> = {};
-  const parsed = onboardingDetails.safeParse(input);
+export function profileProblems(input: Partial<Record<OnboardingProfileField, string>>): Partial<Record<OnboardingProfileField, 'missing' | 'invalid'>> {
+  const out: Partial<Record<OnboardingProfileField, 'missing' | 'invalid'>> = {};
+  const parsed = onboardingProfile.safeParse(input);
   if (parsed.success) return out;
   for (const issue of parsed.error.issues) {
-    const field = issue.path[0] as OnboardingDetailsField;
+    const field = issue.path[0] as OnboardingProfileField;
     if (out[field]) continue;
     out[field] = (input[field] ?? '').trim() === '' ? 'missing' : 'invalid';
   }
   return out;
 }
 
-/** The onboarding consents: 18+ and the terms are required; marketing updates are optional. */
-export const onboardingConsents = z.object({ adult: z.literal(true), terms: z.literal(true), marketing: z.boolean() });
+/** The onboarding consents: the terms are required; marketing updates are optional. */
+export const onboardingConsents = z.object({ terms: z.literal(true), marketing: z.boolean() });
 
 /** Which gate the launch status opens. A held account (suspended) wins over everything else. */
 export type Gate = 'sign-in' | 'onboarding' | 'terms' | 'suspended' | 'member';

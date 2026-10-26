@@ -7,18 +7,9 @@
  * the config and re-apply. A token the config doesn't know (a new semantic colour) goes outside the markers,
  * in light AND dark, with its contrast in a comment.
  */
-@theme {
-  /* Static OFL instances, loaded by AppRoot (packages/ui/assets/fonts, licences alongside). One family name per
-     weight: never combine these with font-bold / font-extrabold (Android would fake the weight).
-     Change the font: the design-system skill, "Change the font" (four places must agree). */
-  --font-sans: 'Inter_400Regular';
-  --font-sans-medium: 'Inter_500Medium';
-  --font-sans-semibold: 'Inter_600SemiBold';
-  --font-sans-bold: 'Inter_700Bold';
-  --font-display: 'Inter_800ExtraBold';
-  --font-mono: 'JetBrainsMono_400Regular';
-  --font-mono-medium: 'JetBrainsMono_500Medium';
-}
+/* Type: the system font (San Francisco on iOS, Roboto on Android) with real weights, until the brand picks a font.
+   Weights come from the weight utilities (font-medium, font-semibold, font-bold, font-extrabold) in the components.
+   Change the font: the design-system skill, "Change the font". */
 
 /* harness:tokens:start (written by `pnpm harness:apply` from harness.config.json; edit the config, not this block) */
 @theme {

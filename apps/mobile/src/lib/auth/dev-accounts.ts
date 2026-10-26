@@ -6,11 +6,11 @@ import { supabase } from '../supabase';
  * A new scenario with its own account adds a row here.
  */
 export const DEV_ACCOUNTS = [
-  { email: 'ada@app.test', who: 'Member' },
+  { email: 'member@app.test', who: 'Member' },
   { email: 'staff@app.test', who: 'Staff' },
   { email: 'admin@app.test', who: 'Admin' },
-  { email: 'olly@app.test', who: 'Onboarding (scenario onboarding)' },
-  { email: 'sid@app.test', who: 'Suspended (scenario suspended)' },
+  { email: 'new@app.test', who: 'Onboarding (scenario onboarding)' },
+  { email: 'held@app.test', who: 'Suspended (scenario suspended)' },
 ] as const;
 
 export async function devSignIn(email: string, password = 'password123') {

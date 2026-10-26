@@ -1,5 +1,5 @@
 // Seeded from react-native-reusables (text), converted to tailwind-variants and the type scale.
-// Sans for display and prose, mono for data. Sizes are pt. PROJECT: tune the scale to the brand here.
+// The system font with real weights; data uses tabular figures. Sizes are pt. PROJECT: tune the scale to the brand here.
 import { Slot } from '@rn-primitives/slot';
 import * as React from 'react';
 import { Text as RNText, type Role } from 'react-native';
@@ -7,31 +7,31 @@ import { tv, type VariantProps } from '../../lib/utils';
 import { cn } from '../../lib/utils';
 
 const textVariants = tv({
-  base: 'text-foreground font-sans text-[17px] leading-[24px]',
+  base: 'text-foreground font-normal text-[17px] leading-[24px]',
   variants: {
     variant: {
       // Display weights. display-xl is for one big number.
-      'display-xl': 'font-display text-[64px] leading-[64px] tracking-[-1.9px]',
-      display: 'font-display text-[44px] leading-[44px] tracking-[-1.3px]',
-      'title-1': 'font-display text-[32px] leading-[34px] tracking-[-0.9px]',
-      'title-2': 'font-sans-bold text-[24px] leading-[26px] tracking-[-0.24px]',
-      'title-3': 'font-sans-bold text-[20px] leading-[24px] tracking-[-0.2px]',
-      headline: 'font-sans-semibold text-[17px] leading-[22px]',
-      body: 'font-sans text-[17px] leading-[24px]',
-      callout: 'font-sans text-[15px] leading-[22px]',
+      'display-xl': 'font-extrabold text-[64px] leading-[64px] tracking-[-1.9px]',
+      display: 'font-extrabold text-[44px] leading-[44px] tracking-[-1.3px]',
+      'title-1': 'font-extrabold text-[32px] leading-[34px] tracking-[-0.9px]',
+      'title-2': 'font-bold text-[24px] leading-[26px] tracking-[-0.24px]',
+      'title-3': 'font-bold text-[20px] leading-[24px] tracking-[-0.2px]',
+      headline: 'font-semibold text-[17px] leading-[22px]',
+      body: 'font-normal text-[17px] leading-[24px]',
+      callout: 'font-normal text-[15px] leading-[22px]',
       // Labels and kickers are small and semibold; data is mono with tabular figures.
-      label: 'font-sans-semibold text-[14px] leading-[18px]',
-      kicker: 'font-sans-semibold text-[12px] leading-[16px] tracking-[0.6px] uppercase',
-      data: 'font-mono text-[15px] leading-[20px]',
-      micro: 'font-sans text-[12px] leading-[16px]',
+      label: 'font-semibold text-[14px] leading-[18px]',
+      kicker: 'font-semibold text-[12px] leading-[16px] tracking-[0.6px] uppercase',
+      data: 'font-normal text-[15px] leading-[20px]',
+      micro: 'font-normal text-[12px] leading-[16px]',
       // Aliases kept for the harness screens (map onto the scale above).
-      default: 'font-sans text-[17px] leading-[24px]',
-      h1: 'font-display text-[32px] leading-[34px] tracking-[-0.9px]',
-      h2: 'font-sans-bold text-[24px] leading-[26px] tracking-[-0.24px]',
-      h3: 'font-sans-bold text-[20px] leading-[24px] tracking-[-0.2px]',
-      lead: 'font-sans text-[17px] leading-[24px]',
-      muted: 'font-sans text-muted-foreground text-[15px] leading-[22px]',
-      mono: 'font-mono text-[15px] leading-[20px] tracking-[0.3px]',
+      default: 'font-normal text-[17px] leading-[24px]',
+      h1: 'font-extrabold text-[32px] leading-[34px] tracking-[-0.9px]',
+      h2: 'font-bold text-[24px] leading-[26px] tracking-[-0.24px]',
+      h3: 'font-bold text-[20px] leading-[24px] tracking-[-0.2px]',
+      lead: 'font-normal text-[17px] leading-[24px]',
+      muted: 'font-normal text-muted-foreground text-[15px] leading-[22px]',
+      mono: 'font-normal text-[15px] leading-[20px] tracking-[0.3px]',
     },
     align: { left: 'text-left', center: 'text-center', right: 'text-right' },
   },

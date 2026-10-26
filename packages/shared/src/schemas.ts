@@ -9,18 +9,24 @@ export type MemberRole = z.infer<typeof memberRole>;
 export const member = z.object({
   id: z.uuid(),
   email: z.string().nullable(),
-  first_name: z.string().min(1).max(60).nullable(),
-  last_name: z.string().min(1).max(60).nullable(),
+  display_name: z.string().min(1).max(60).nullable(),
+  /** PROJECT: EXAMPLE onboarding field; replace or delete it. */
+  about: z.string().max(280).nullable(),
   status: memberStatus,
-  onboarding_completed_at: z.string().nullable(),
+  onboarded_at: z.string().nullable(),
   created_at: z.string(),
 });
 export type Member = z.infer<typeof member>;
 
-/** Profile fields a member may edit directly (column grants on `members`). */
+/**
+ * The profile a member fills in at onboarding and may edit directly (column grants on `members`).
+ * PROJECT: a new onboarding field is a key here, a column and a `complete_onboarding` argument in the database,
+ * and a field in apps/mobile/src/app/(onboarding)/profile.tsx (recipe: the db-change skill).
+ */
 export const profileUpdate = z.object({
-  first_name: z.string().trim().min(1).max(60),
-  last_name: z.string().trim().min(1).max(60),
+  display_name: z.string().trim().min(1).max(60),
+  /** EXAMPLE optional field: replace or delete it. */
+  about: z.string().trim().max(280).optional(),
 });
 
 /** An item (the list + detail catalogue) as the app reads it under RLS. */
@@ -42,9 +48,7 @@ export function isStaff(roles: MemberRole | readonly MemberRole[]): boolean {
   return list.includes('staff') || list.includes('admin');
 }
 
-/** "Ada L.": how names leave the server on shared screens. */
-export function shortName(first: string | null, last: string | null, fallback = 'Member'): string {
-  const f = first?.trim() ?? '';
-  const l = last?.trim() ?? '';
-  return [f, l ? `${l[0]}.` : ''].filter(Boolean).join(' ') || fallback;
+/** The name to show for a member: the display name, or a fallback while there is none. */
+export function displayName(name: string | null | undefined, fallback = 'Member'): string {
+  return name?.trim() || fallback;
 }

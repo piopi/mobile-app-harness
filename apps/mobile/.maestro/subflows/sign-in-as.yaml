@@ -1,5 +1,5 @@
 # Sign in to a seeded account through the dev-only agent link (password123). Pass EMAIL_JSON, URL-encoded:
-# %7B%22email%22%3A%22ada%40app.test%22%7D
+# %7B%22email%22%3A%22member%40app.test%22%7D
 appId: ${APP_ID}
 ---
 - openLink: ${SCHEME}://__agent/sign-in?payload=${EMAIL_JSON}

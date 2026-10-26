@@ -158,7 +158,7 @@ function* docs(dir) {
   }
 }
 if (before) {
-  // Longest first, so "com.example.acme" is replaced before "acme". Scheme only as "<scheme>://".
+  // Longest first, so "com.example.app" is replaced before "app". Scheme only as "<scheme>://".
   const pairs = [
     [before.repo, identity.repo],
     [before.bundleId, identity.bundleId],
