@@ -234,7 +234,9 @@ async function ensureIosApp(udid, hash, { force = false } = {}) {
     }
     log(`no cached iOS build for ${hash.slice(0, 12)}: building (expo run:ios), this takes minutes`);
     // No --configuration: with `--configuration Debug` Expo CLI always starts Metro and never exits.
-    await runAsync('npx', ['expo', 'run:ios', '--device', udid, '--no-bundler'], {
+    // Background QoS (`taskpolicy -b`): the build stays on the efficiency cores. Slower, but a full Xcode
+    // build otherwise runs ~30 compilers on every core and overheats a laptop that also hosts other agents.
+    await runAsync('taskpolicy', ['-b', 'npx', 'expo', 'run:ios', '--device', udid, '--no-bundler'], {
       cwd: MOBILE,
       stdio: 'inherit',
       env: { ...process.env, EXPO_PUBLIC_STORYBOOK: 'true' },
@@ -284,7 +286,7 @@ async function ensureEmulator(k) {
 async function buildAndroidApk(hash) {
   log(`no cached Android build for ${hash.slice(0, 12)}: prebuild + gradle assembleDebug, this takes minutes`);
   await runAsync('npx', ['expo', 'prebuild', '--platform', 'android', '--no-install'], { cwd: MOBILE, stdio: 'inherit' });
-  await runAsync('./gradlew', ['app:assembleDebug', '-PreactNativeArchitectures=arm64-v8a'], {
+  await runAsync('taskpolicy', ['-b', './gradlew', 'app:assembleDebug', '-PreactNativeArchitectures=arm64-v8a', '--max-workers=4'], {
     cwd: path.join(MOBILE, 'android'),
     stdio: 'inherit',
   });

@@ -170,6 +170,7 @@ The club-specific episodes behind some generic lessons below:
 - **One Android emulator machine-wide** (`wt up --android` refuses a second). Boot it only for the final parity pass, take every Android shot in one batch, kill it.
 - **At most two feature agents at a time**, each in its own slot.
 - `wt up` warns when the 5-minute load is above the core count.
+- **Native builds run at background priority:** `wt` wraps `expo run:ios` and Gradle in `taskpolicy -b` (efficiency cores only) and caps Gradle at `--max-workers=4`. A full Xcode build otherwise runs ~30 compilers on every core. Agents never start `expo run:*` or `xcodebuild` themselves.
 - **Disk is the binding constraint.** With 2–5 GB free and 16 GB of swap, Android builds failed twice with "No space left on device"; the shared AVD's `/data` was 98 % full. Keep 10 GB free; delete generated native folders after a build.
 - A cost of the cap: Android shots were sometimes left stale because the emulator was off to cool the laptop. List stale shots in the PR rather than hiding them.
 

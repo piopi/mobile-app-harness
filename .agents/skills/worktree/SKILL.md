@@ -37,7 +37,7 @@ pnpm wt up                                                  # add --android for 
 
 - The app config sets `buildCacheProvider: expo/local-build-cache-provider` with `cacheDir: ~/.<slug>/build-cache`, shared by every worktree.
 - `wt up` computes the Expo fingerprint of `apps/mobile`. On a hit it installs `ios-<hash>-unknown.app` / `android-<hash>-unknown.apk` straight from the cache (seconds; no prebuild, no pods).
-- On a miss it takes the machine-wide lock (`~/.<slug>/locks/ios-build` or `android-build`), checks the cache again, then builds: `expo run:ios --device <udid> --no-bundler` (which uploads to the cache), or `expo prebuild` + `gradlew app:assembleDebug` (copied in atomically). Other worktrees wait for the lock instead of building the same thing.
+- On a miss it takes the machine-wide lock (`~/.<slug>/locks/ios-build` or `android-build`), checks the cache again, then builds: `expo run:ios --device <udid> --no-bundler` (which uploads to the cache), or `expo prebuild` + `gradlew app:assembleDebug` (copied in atomically). Other worktrees wait for the lock instead of building the same thing. Both builds run at background priority (`taskpolicy -b`, Gradle `--max-workers=4`): slower, but the laptop stays usable for the other agents.
 - What changes the fingerprint: native packages, config plugins, `app.config.ts`, `package.json` dependency changes, `patches/`. JS, CSS and `.env.local` never do. `pnpm wt fingerprint` prints the hash.
 - **Never put per-worktree values in `app.config.ts`.** It would give every worktree its own fingerprint and defeat the cache.
 - `pnpm wt build ios|android [--force]` fills the cache without the rest of `wt up`.
