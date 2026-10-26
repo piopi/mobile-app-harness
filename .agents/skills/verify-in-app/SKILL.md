@@ -77,7 +77,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
 6. **Batch what you already know.** One verb per call is for exploring. Once the path is known (retakes, a sweep of every state, a dark and light pass), run it as one `batch` request: every model turn costs far more than the steps themselves (measured: ~28 s per tool call, against 3 s for 2 taps and 2 shots in one batch). A batch has a 60-second budget, stops on the first failure with `--on-error stop`, and cannot open links, so flip agent events with `pnpm agent` between batches (one batch per theme or state):
 
    ```bash
-   cat > /tmp/sweep.json <<'JSON'
+   mkdir -p .wt/tmp && cat > .wt/tmp/sweep.json <<'JSON'
    [
      {"command":"press","input":{"target":{"kind":"selector","selector":"label=\"Items\""},"settle":true}},
      {"command":"screenshot","input":{"path":"docs/screenshots/items/ios-dark-list.png","pixelDensity":2,"normalizeStatusBar":true}},
@@ -86,7 +86,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
    ]
    JSON
    pnpm agent theme '{"theme":"dark"}'
-   pnpm exec agent-device batch --steps-file /tmp/sweep.json --on-error stop --session wt-<k>
+   pnpm exec agent-device batch --steps-file .wt/tmp/sweep.json --on-error stop --session wt-<k>
    ```
 
    Steps take the structured input (a CLI flag `--settle` becomes `"settle":true`, a positional becomes a named field); `agent-device batch --help` has the rules.
@@ -94,7 +94,7 @@ Run the app on fake local data, drive it step by step, look at the result, and k
 7. **Screenshot.** Working shots small, committed shots at 2x with a normalised status bar:
 
    ```bash
-   pnpm exec agent-device screenshot /tmp/look.png --scale 0.3 --session wt-<k>                          # to look at
+   pnpm exec agent-device screenshot .wt/tmp/look.png --scale 0.3 --session wt-<k>                          # to look at
    pnpm exec agent-device screenshot docs/screenshots/<feature>/ios-dark-<state>.png --pixel-density 2 --normalize-status-bar --session wt-<k>
    ```
 

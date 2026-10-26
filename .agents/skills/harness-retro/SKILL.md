@@ -37,7 +37,7 @@ The harness gets better only if every agent leaves it a little more accurate tha
 
 4. **Edit, in this PR.** Make the changes. Follow the writing style of the file you edit (short, direct, one idea per line, the reason after the rule). Don't rewrite what you didn't touch.
 
-5. **Is it generic?** If a change would help any app made from the template (a script fix, a skill step, a gotcha about Expo, Supabase, the slots or the devices), run `pnpm harness:diff --patch <paths> > /tmp/harness.patch` and tell the human it can go back to the template (`harness.template` in `harness.config.json`). Don't push to the template yourself unless asked.
+5. **Is it generic?** If a change would help any app made from the template (a script fix, a skill step, a gotcha about Expo, Supabase, the slots or the devices), run `pnpm harness:diff --patch <paths> > .wt/tmp/harness.patch` and tell the human it can go back to the template (`harness.template` in `harness.config.json`). Don't push to the template yourself unless asked.
 
 6. **Report.** In the PR's checklist, tick "Harness kept current" and add one line per change under it (`AGENTS.md: …`, `worktree skill: …`), or write "No harness changes: nothing surprising" when that is true.
 

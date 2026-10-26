@@ -75,15 +75,18 @@ Wait until the 5-minute load is under the core count, then:
 
 ```bash
 pnpm wt up                    # first run builds the dev client (minutes); later runs reuse the cache
+cat .wt/state.json            # slot <k>, metroPort, udid
+# Open the agent-device session first: `pnpm agent` answers iOS's "Open in <app>?" prompt through it.
+pnpm exec agent-device open <bundleId> --platform ios --udid <udid> --session wt-<k> --metro-port <metroPort>
 pnpm agent sign-in '{"email":"member@app.test"}'
-pnpm exec agent-device open <bundleId> --platform ios --udid <udid from .wt/state.json> --session wt-<k> --metro-port <port>
-pnpm exec agent-device wait text "Harness ready." --session wt-<k>
-pnpm exec agent-device screenshot /tmp/smoke.png --scale 0.4 --session wt-<k>
+pnpm exec agent-device wait text "Harness ready." 45000 --session wt-<k>
+pnpm exec agent-device wait text "BACKEND ok" 20000 --session wt-<k>
+mkdir -p .wt/tmp && pnpm exec agent-device screenshot .wt/tmp/smoke.png --scale 0.4 --session wt-<k>
 pnpm exec agent-device close --session wt-<k>
 pnpm wt down
 ```
 
-Look at the screenshot: Home with "Harness ready." and "BACKEND ok". No Android emulator here unless the human asks; the first feature's parity check boots it.
+Both waits must succeed, and the screenshot must show Home with "Harness ready." and "BACKEND ok". If a prompt is still on screen, the session was opened after the link: answer it (`snapshot -i`, then `press` on "Open") and fix the order. No Android emulator here unless the human asks; the first feature's parity check boots it.
 
 ## 6. Commit and push
 
