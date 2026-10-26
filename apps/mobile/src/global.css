@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import 'uniwind';
+@import '../../../packages/ui/src/theme.css';
+
+/* Scan the component library too: screens compose packages/ui. */
+@source '../../../packages/ui/src';

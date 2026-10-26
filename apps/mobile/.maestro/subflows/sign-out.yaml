@@ -1,0 +1,11 @@
+# Sign out through the dev-only agent link and wait for the landing.
+appId: ${APP_ID}
+---
+- openLink: ${SCHEME}://__agent/sign-out
+- tapOn:
+    text: Open
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: landing-screen
+    timeout: 15000

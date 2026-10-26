@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "Acme",
+    "slug": "acme",
+    "scheme": "acme",
+    "bundleId": "com.example.acme",
+    "androidPackage": "com.example.acme",
+    "platforms": ["ios", "android"]
+  },
+  "expo": { "sdk": "58" },
+  "github": { "repo": "piopi/mobile-app-harness" },
+  "harness": { "template": "piopi/mobile-app-harness", "workspaceScope": "@app" },
+  "backend": "supabase",
+  "reference": null,
+  "brand": {
+    "defaultAppearance": "dark",
+    "radius": { "ui": 10, "object": 16, "sheet": 22 },
+    "light": {
+      "background": "#ffffff",
+      "surface": "#f3f4f6",
+      "surface-elevated": "#ffffff",
+      "foreground": "#111827",
+      "muted-foreground": "#6b7280",
+      "hairline": "#e5e7eb",
+      "control": "#8b919c",
+      "primary": "#4f46e5",
+      "primary-foreground": "#ffffff",
+      "accent": "#0ea5e9",
+      "accent-foreground": "#ffffff",
+      "danger": "#b42318",
+      "danger-soft": "#fdecea"
+    },
+    "dark": {
+      "background": "#0b0d12",
+      "surface": "#161a22",
+      "surface-elevated": "#1e232d",
+      "foreground": "#f3f4f6",
+      "muted-foreground": "#9ca3af",
+      "hairline": "#262b36",
+      "control": "#8b919c",
+      "primary": "#818cf8",
+      "primary-foreground": "#0b0d12",
+      "accent": "#38bdf8",
+      "accent-foreground": "#0b0d12",
+      "danger": "#ff8f7f",
+      "danger-soft": "#2a1613"
+    }
+  }
+}

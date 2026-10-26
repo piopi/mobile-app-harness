@@ -1,0 +1,14 @@
+# Off camera: the app open on Home as a signed-in member (Ada, through the dev-only sign-in link).
+appId: ${APP_ID}
+---
+- runFlow: ../_open.yaml
+- openLink: ${SCHEME}://__agent/sign-in?payload=%7B%22email%22%3A%22ada%40app.test%22%7D
+- tapOn:
+    text: Open
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 20000
+- tapOn: Home
+- runFlow: ../_pause.yaml

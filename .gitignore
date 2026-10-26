@@ -1,0 +1,16 @@
+node_modules/
+.env.local
+.env*.local
+.wt/
+.expo/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+# generated native folders (Continuous Native Generation)
+apps/mobile/ios/
+apps/mobile/android/
+# Maestro / agent-device artefacts
+.maestro-out/
+# Client demo videos (pnpm demo)
+demos-out/

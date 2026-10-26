@@ -1,0 +1,35 @@
+# Critical path of the harness: the dev client loads this slot's bundle, Home reaches this slot's Supabase stack,
+# and dev-only agent events flip client state without leaving the screen.
+# Run with `pnpm e2e` (it passes APP_ID, SCHEME, METRO_PORT and WT_SLOT and picks this slot's device).
+# scenario: base
+appId: ${APP_ID}
+name: Harness home + agent events
+---
+- runFlow: subflows/launch.yaml
+- runFlow:
+    file: subflows/sign-in-as.yaml
+    env:
+      EMAIL_JSON: '%7B%22email%22%3A%22ada%40app.test%22%7D'
+- extendedWaitUntil:
+    visible: Harness ready.
+    timeout: 30000
+- assertVisible: SLOT ${WT_SLOT} · METRO ${METRO_PORT}
+- extendedWaitUntil:
+    visible: BACKEND ok.*
+    timeout: 15000
+- tapOn: Items
+- assertVisible: Welcome
+- openLink: ${SCHEME}://__agent/offline
+- tapOn:
+    text: Open
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: items-offline
+    timeout: 10000
+- openLink: ${SCHEME}://__agent/reset
+- tapOn:
+    text: Open
+    optional: true
+- assertNotVisible:
+    id: items-offline

@@ -1,0 +1,31 @@
+# The terms re-accept gate: an admin published terms 2.0 (scenario terms-outdated); Ada must read and accept them
+# before anything else, then lands on Home. The new version's "what changed" list shows.
+# scenario: terms-outdated
+appId: ${APP_ID}
+name: Terms re-accept gate
+---
+- runFlow: subflows/launch.yaml
+- runFlow:
+    file: subflows/sign-in-as.yaml
+    env:
+      EMAIL_JSON: '%7B%22email%22%3A%22ada%40app.test%22%7D'
+- extendedWaitUntil:
+    visible: The terms have a new version.
+    timeout: 15000
+- assertVisible: .*A clearer section on your data.*
+- scrollUntilVisible:
+    element:
+      id: accept-terms
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: accept-terms
+- scrollUntilVisible:
+    element:
+      id: terms-accept
+    direction: DOWN
+- tapOn:
+    id: terms-accept
+- extendedWaitUntil:
+    visible: Harness ready.
+    timeout: 15000

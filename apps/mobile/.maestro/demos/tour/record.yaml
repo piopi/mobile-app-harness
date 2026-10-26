@@ -1,0 +1,31 @@
+# On camera: a walk through the shell at a viewer's pace.
+appId: ${APP_ID}
+---
+- runFlow: ../_pause.yaml
+- tapOn: Items
+- runFlow: ../_pause.yaml
+- tapOn: Welcome
+- runFlow: { file: ../_pause.yaml, env: { MS: 2500 } }
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- tapOn: Me
+- runFlow: ../_pause.yaml
+- tapOn:
+    id: me-appearance
+- runFlow: { file: ../_pause.yaml, env: { MS: 2000 } }
+- tapOn: Cancel
+- tapOn:
+    id: me-sign-out
+- runFlow: { file: ../_pause.yaml, env: { MS: 2000 } }
+- tapOn: Stay signed in
+- runFlow: ../_pause.yaml

@@ -1,0 +1,81 @@
+# The route tree end to end: native tabs, a tab's own stack (list → detail), the branded AlertDialog, the account
+# gates (sign out, then back in with a seeded account) and the dev panel. Tabs are matched by their accessibility
+# label, which is the same on iOS (label) and Android (content description).
+# scenario: base
+appId: ${APP_ID}
+name: Navigation, gates and the dev panel
+---
+- runFlow: subflows/launch.yaml
+- runFlow:
+    file: subflows/sign-in-as.yaml
+    env:
+      EMAIL_JSON: '%7B%22email%22%3A%22ada%40app.test%22%7D'
+- extendedWaitUntil:
+    visible: Harness ready.
+    timeout: 30000
+
+# List → detail on the Items tab's own stack
+- tapOn: Items
+- tapOn: Welcome
+- assertVisible: Start here
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: Second item
+- assertNotVisible: Draft item
+
+# Me: the dev panel, then the branded AlertDialog
+- tapOn: Me
+- tapOn:
+    id: me-dev
+- assertVisible: Agent state
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- tapOn:
+    id: me-sign-out
+- assertVisible: Sign out\?
+- tapOn: Stay signed in
+- assertNotVisible: Sign out\?
+- tapOn:
+    id: me-sign-out
+- tapOn:
+    id: confirm-sign-out
+- extendedWaitUntil:
+    visible:
+      id: landing-screen
+    timeout: 10000
+
+# Sign back in with a seeded account (dev builds list them under the sign-in form)
+- tapOn:
+    id: landing-sign-in
+- scrollUntilVisible:
+    element:
+      id: dev-account-staff@app.test
+    direction: DOWN
+- tapOn:
+    id: dev-account-staff@app.test
+- extendedWaitUntil:
+    visible: Harness ready.
+    timeout: 10000
+# Staff see drafts
+- tapOn: Items
+- assertVisible: Draft item

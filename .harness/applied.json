@@ -1,0 +1,17 @@
+{
+  "identity": {
+    "name": "Acme",
+    "slug": "acme",
+    "scheme": "acme",
+    "bundleId": "com.example.acme",
+    "androidPackage": "com.example.acme",
+    "repo": "piopi/mobile-app-harness"
+  },
+  "icons": {
+    "apps/mobile/assets/icon.png": "a7cbb61ddb85656e9db9f47bd00ae8464236485cb6742787a0fb2d696b179455",
+    "apps/mobile/assets/splash-icon.png": "35e9fe085b8eb4cb034839878a3c275c5fdb03a8460a1442d14eb99ca5683a50",
+    "apps/mobile/assets/android-icon-foreground.png": "c57d9938e009cfc5500c1c72f8572226e070969e807e4f593bab867f35672eae",
+    "apps/mobile/assets/android-icon-background.png": "238a49d51680bbd249adb07bb3d955cd72dc8efaec57a60f73e8ecb03a74d465",
+    "apps/mobile/assets/android-icon-monochrome.png": "c57d9938e009cfc5500c1c72f8572226e070969e807e4f593bab867f35672eae"
+  }
+}

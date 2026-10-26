@@ -1,0 +1,14 @@
+# Load this slot's bundle in the dev client and wait for the first gate (signed in or not).
+# ${APP_ID}, ${SCHEME} and ${METRO_PORT} come from `pnpm e2e` (scripts/lib/env.mjs maestroEnv).
+appId: ${APP_ID}
+---
+- launchApp:
+    stopApp: true
+- openLink: exp+${SCHEME}://?__expo_url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&__expo_disable_onboarding=1&__expo_disable_fab=1
+- tapOn:
+    text: Open
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: '(landing-screen|sign-in-screen|home-screen|onboarding-details|terms-screen|suspended-screen)'
+    timeout: 60000

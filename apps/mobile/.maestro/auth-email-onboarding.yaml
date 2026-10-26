@@ -1,0 +1,82 @@
+# A new person signs up: the landing → Get started → an email code (read from this stack's Mailpit) → onboarding
+# 1 / 2 (name) → 2 / 2 (18+, the terms, updates) → Home. A new address every run, so it always meets onboarding.
+# scenario: base
+appId: ${APP_ID}
+name: Sign up with an email code, onboarding, Home
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/sign-out.yaml
+- tapOn:
+    id: landing-join
+- extendedWaitUntil:
+    visible:
+      id: sign-up-screen
+    timeout: 10000
+- runScript: scripts/new-email.js
+- tapOn:
+    id: email-input
+- inputText: ${output.email}
+# Return sends the code (the button sits under the keyboard on small phones).
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: Check your email
+    timeout: 15000
+- runScript:
+    file: scripts/mailpit-code.js
+    env:
+      EMAIL: ${output.email}
+- tapOn:
+    id: code-input
+- inputText: ${output.code}
+
+# Onboarding 1 / 2
+- extendedWaitUntil:
+    visible:
+      id: onboarding-details
+    timeout: 15000
+- assertVisible: Signed in as ${output.email}
+- tapOn:
+    id: first-name
+- inputText: Mae
+- pressKey: Enter
+- inputText: Stro
+- tapOn:
+    id: details-continue
+
+# Onboarding 2 / 2
+- extendedWaitUntil:
+    visible:
+      id: onboarding-consent
+    timeout: 10000
+- tapOn:
+    id: adult
+- tapOn:
+    id: open-terms-text
+- assertVisible: Using the app
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: close-terms-text
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- scrollUntilVisible:
+    element:
+      id: accept-terms
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: accept-terms
+- scrollUntilVisible:
+    element:
+      id: finish-setup
+    direction: DOWN
+- tapOn:
+    id: finish-setup
+- extendedWaitUntil:
+    visible: Harness ready.
+    timeout: 15000

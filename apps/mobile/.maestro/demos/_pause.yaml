@@ -1,0 +1,8 @@
+# A beat for the viewer to read the screen. Maestro has no sleep, so wait for text that never appears.
+#   - runFlow: { file: ../_pause.yaml, env: { MS: 2000 } }
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: __demo_pause__
+    timeout: ${MS || 1500}
+    optional: true

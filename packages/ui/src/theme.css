@@ -1,0 +1,97 @@
+/*
+ * Design tokens: the single source of truth for colour, radius, type and fonts.
+ * Read the design-system skill (.agents/skills/design-system/SKILL.md) before adding or changing a token.
+ * Imported by apps/mobile/src/global.css. Components use the semantic names (bg-background, text-foreground, ...).
+ *
+ * The colour and radius block below is written by `pnpm harness:apply` from harness.config.json (`brand`): change
+ * the config and re-apply. A token the config doesn't know (a new semantic colour) goes outside the markers,
+ * in light AND dark, with its contrast in a comment.
+ */
+@theme {
+  /* Static OFL instances, loaded by AppRoot (packages/ui/assets/fonts, licences alongside). One family name per
+     weight: never combine these with font-bold / font-extrabold (Android would fake the weight).
+     Change the font: the design-system skill, "Change the font" (four places must agree). */
+  --font-sans: 'Inter_400Regular';
+  --font-sans-medium: 'Inter_500Medium';
+  --font-sans-semibold: 'Inter_600SemiBold';
+  --font-sans-bold: 'Inter_700Bold';
+  --font-display: 'Inter_800ExtraBold';
+  --font-mono: 'JetBrainsMono_400Regular';
+  --font-mono-medium: 'JetBrainsMono_500Medium';
+}
+
+/* harness:tokens:start (written by `pnpm harness:apply` from harness.config.json; edit the config, not this block) */
+@theme {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  /* Physical objects (cards that stand for a thing, photos) and sheets. */
+  --radius-object: 16px;
+  --radius-sheet: 22px;
+}
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: #ffffff;
+      --color-surface: #f3f4f6;
+      --color-surface-elevated: #ffffff;
+      --color-foreground: #111827;
+      --color-muted-foreground: #6b7280;
+      --color-hairline: #e5e7eb;
+      --color-control: #8b919c;
+      --color-primary: #4f46e5;
+      --color-primary-foreground: #ffffff;
+      --color-accent: #0ea5e9;
+      --color-accent-foreground: #ffffff;
+      --color-danger: #b42318;
+      --color-danger-soft: #fdecea;
+      /* Scrims and night grounds: the same in both themes (photos, dialogs, forced-dark moments) */
+      --color-ink: #050608;
+      --color-on-ink: #f5f5f4;
+      /* shadcn / react-native-reusables aliases (derived) */
+      --color-card: #f3f4f6;
+      --color-card-foreground: #111827;
+      --color-secondary: #f3f4f6;
+      --color-secondary-foreground: #111827;
+      --color-muted: #f3f4f6;
+      --color-accent-surface: #ffffff;
+      --color-destructive: #b42318;
+      --color-border: #e5e7eb;
+      --color-input: #8b919c;
+      --color-ring: #4f46e5;
+    }
+
+    @variant dark {
+      --color-background: #0b0d12;
+      --color-surface: #161a22;
+      --color-surface-elevated: #1e232d;
+      --color-foreground: #f3f4f6;
+      --color-muted-foreground: #9ca3af;
+      --color-hairline: #262b36;
+      --color-control: #8b919c;
+      --color-primary: #818cf8;
+      --color-primary-foreground: #0b0d12;
+      --color-accent: #38bdf8;
+      --color-accent-foreground: #0b0d12;
+      --color-danger: #ff8f7f;
+      --color-danger-soft: #2a1613;
+      /* Scrims and night grounds: the same in both themes (photos, dialogs, forced-dark moments) */
+      --color-ink: #050608;
+      --color-on-ink: #f5f5f4;
+      /* shadcn / react-native-reusables aliases (derived) */
+      --color-card: #161a22;
+      --color-card-foreground: #f3f4f6;
+      --color-secondary: #161a22;
+      --color-secondary-foreground: #f3f4f6;
+      --color-muted: #161a22;
+      --color-accent-surface: #1e232d;
+      --color-destructive: #ff8f7f;
+      --color-border: #262b36;
+      --color-input: #8b919c;
+      --color-ring: #818cf8;
+    }
+  }
+}
+/* harness:tokens:end */

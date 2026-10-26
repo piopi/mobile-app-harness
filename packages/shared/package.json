@@ -1,0 +1,14 @@
+{
+  "name": "@app/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "gen:types": "SUPABASE_EXPERIMENTAL_STACK=1 supabase --workdir ../.. gen types typescript --local --schema public > src/database.types.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}
