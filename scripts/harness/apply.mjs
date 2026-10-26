@@ -173,6 +173,12 @@ if (before) {
       if (!existsSync(file)) continue;
       let text = readFileSync(file, 'utf8');
       const tokens = new Map();
+      // The template's own name stays as it is (links back to the template), even when it was this repo's name.
+      const template = CONFIG.harness?.template;
+      if (template) {
+        tokens.set('\u0000harnessTemplate\u0000', template);
+        text = text.split(template).join('\u0000harnessTemplate\u0000');
+      }
       // Two passes through unique tokens, so a new value that contains an old one is never replaced twice.
       pairs.forEach(([a], i) => {
         const token = `\u0000harness${i}\u0000`;

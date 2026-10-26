@@ -36,7 +36,7 @@ Required when a user can see the change; write "No UI change" otherwise.
 Take them with the verify-in-app skill, commit them to docs/screenshots/<feature>/<platform>-<theme>-<state>.png,
 and embed the committed files with links pinned to the commit SHA (`git rev-parse HEAD` after pushing the shots), never the branch:
 GitHub caches images by URL, so a branch link keeps showing an old shot after a retake.
-![Home, dark](https://github.com/piopi/mobile-app-harness/blob/<sha>/docs/screenshots/<feature>/ios-dark-home.png?raw=true)
+![Home, dark](https://github.com/<owner>/<repo>/blob/<sha>/docs/screenshots/<feature>/ios-dark-home.png?raw=true)
 After a retake, re-pin every link to the new SHA.
 The app's default appearance first (the other theme in a collapsed <details>, only when colour changed).
 iOS for every state, Android at least once (every time the change touches something that differs by platform).
