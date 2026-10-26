@@ -13,7 +13,7 @@ Screens may not style anything (ESLint enforces it). When a screen needs somethi
 
 ## Steps
 
-1. **Check what exists.** `packages/ui/src/index.ts` lists every component; Storybook (`<scheme>://storybook`) shows them. Prefer a new variant on an existing component over a new component. If the component touches platform behaviour (insets, keyboard, sheet, blur, haptics, image, gesture), apply "Official before custom" from AGENTS.md: find the Expo or official module first and wrap it, rather than rebuilding it.
+1. **Check what exists.** `packages/ui/src/index.ts` lists every component; Storybook (`<scheme>://storybook`) shows them. Prefer a new variant on an existing component over a new component. If the component touches platform behaviour (insets, keyboard, sheet, blur, haptics, image, gesture), apply "Official before custom" from AGENTS.md: find the Expo or official module first and wrap it, rather than rebuilding it. If none, search npm and GitHub for a maintained library before you write one: we don't reinvent the wheel.
 2. **Start from react-native-reusables** when it has the component:
 
    ```bash
