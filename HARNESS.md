@@ -5,6 +5,7 @@ The playbook behind this template: what each piece of the agent harness is, **wh
 
 ## Contents
 
+- [The technologies](#the-technologies)
 1. [Principles](#1-principles)
 2. [Instructions: AGENTS.md, skills, the glossary](#2-instructions-agentsmd-skills-the-glossary)
 3. [Working with the human](#3-working-with-the-human)
@@ -27,6 +28,65 @@ The playbook behind this template: what each piece of the agent harness is, **wh
 20. [Rebuilding the harness on another stack](#20-rebuilding-the-harness-on-another-stack)
 21. [Incident log](#21-incident-log)
 22. [Open problems](#22-open-problems)
+
+## The technologies
+
+What each tool is, in plain words, and what this template uses it for.
+
+### The app
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **React Native** | A framework to build iPhone and Android apps from one code base, with the real native parts of each phone | The whole app |
+| **Expo** | A toolkit around React Native: native modules, builds and updates | Native features (sign-in with Apple, haptics, secure storage, splash screen, status and navigation bars) and the dev client |
+| **Expo Router** | File-based navigation: each file in `app/` is a screen | Tabs, stacks, modals, sheets, deep links and the sign-in gates (`Stack.Protected`) |
+| **TypeScript** | JavaScript with types | All code, so mistakes show up before the app runs |
+| **TanStack Query** | A data-fetching and caching library | Loading data from the backend, caching it, and keeping screens fast with a weak signal |
+| **Zod** | A schema library | Checking every input and output of the backend functions, shared by the app and the tests |
+
+### The look
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **Uniwind (Tailwind CSS)** | Utility-class styling for React Native | All styling, with the design tokens (colours, fonts, spacing) in one file, `theme.css` |
+| **react-native-reusables** (on **@rn-primitives**) | Open-source, shadcn-style components, copied into the repo | The starting point of the component library in `packages/ui`: buttons, dialogs, sheets, checkboxes |
+| **tailwind-variants** | Typed style variants | Component variants (`primary`, `ghost`, sizes) without one-off styles |
+| **Reanimated** and **Gesture Handler** | Animation and gesture libraries that run on the native thread | Motion primitives (fades, presses, number rolls) and gestures |
+| **Phosphor** | An icon set with several weights | Every icon, including the tab bar icons |
+| **Storybook** (on device) | A catalogue of components with each of their states | Building and checking components in isolation, and screenshots of them |
+
+### The backend
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **Supabase** | A hosted Postgres database with sign-in, file storage and server functions | All data, sign-in (Apple, Google, email codes) and server-side logic |
+| **Postgres row-level security** | Rules inside the database about who can read or change each row | Security that a tampered app cannot get around |
+| **Database functions (RPCs)** | Functions that run inside the database | Every write that changes something important, with checks and an audit log |
+| **Supabase CLI** (stack mode) | Runs a full local copy of the backend | A private backend for each agent's workspace |
+
+### Testing and checks
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **Vitest** | A fast test runner | Shared logic and the integration tests against a real local backend |
+| **Jest** with **React Native Testing Library** | Component tests | Screens and components, tested like a user uses them |
+| **pgTAP** | Tests written inside the database | Security rules and database functions |
+| **Maestro** | Scripted flows on a simulator or emulator | End-to-end flows (sign in, onboarding) and the saved demo videos |
+| **ESLint** | A code checker | Code style and the template's own rules (native navigation only, no system pop-ups, no one-off styles) |
+| **GitHub Actions** | Automatic checks on GitHub | Type checks, lint, unit tests, and the backend and database tests on every pull request |
+
+### The agent harness
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **Claude Code** | The AI coding agent | Building features, one ticket at a time |
+| **AGENTS.md** and **skills** (`.agents/skills`) | The rulebook and step-by-step guides the agents read | How to add a screen, change the database, check a change, record a demo |
+| **git worktrees** | Several working copies of one repo | One private copy per agent, so agents work in parallel |
+| **`pnpm wt`** (our script) | Starts an agent's workspace | Its own simulator, app server and local backend, with shared native builds |
+| **agent-device** | A tool that drives simulators and emulators | Tapping through the app, screenshots and demo recordings |
+| **iOS Simulator** and **Android Emulator** | Virtual phones on the Mac | Running the app without a real phone |
+| **ffmpeg** | A video tool | Cutting the dead time out of demo videos |
+| **pnpm** | A package manager for the monorepo | Installing packages and running every script |
 
 ## 1. Principles
 
