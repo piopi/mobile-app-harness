@@ -21,6 +21,15 @@ that will build it: no deferral lives only here.
 |---|---|---|---|---|
 |  |  |  |  |  |
 
+## Delight
+
+<!--
+Required for every PR a user can see. Run the delight skill and write what you did:
+- the quiet polish each new or changed screen got (motion primitives, haptics), and
+- any real peak: the signature moment candidates you proposed to the human (or "no real peak").
+Write "Not user-facing" for backend, data or harness-only PRs.
+-->
+
 ## Scenarios
 
 <!-- How a reviewer reproduces each state locally: `pnpm wt up`, `pnpm seed <scenario>`, agent events, deep links. -->
@@ -59,6 +68,7 @@ E2E: the Maestro flow(s) for the critical path, run locally with `pnpm e2e` (no 
 
 ## Checklist
 
+- [ ] Delight skill run: polish applied and peaks proposed, or not user-facing
 - [ ] `pnpm typecheck && pnpm lint && pnpm test:unit` green locally
 - [ ] `pnpm test:integration && pnpm test:db` green locally (DB changes)
 - [ ] Maestro flow added or updated and green (`pnpm e2e`), or no user-facing path changed
