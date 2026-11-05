@@ -69,6 +69,8 @@ export function regenerateEnv(slot = {}) {
       EXPO_PUBLIC_SUPABASE_ANON_KEY: sb.ANON_KEY,
       EXPO_PUBLIC_WT_SLOT: slot.k,
       EXPO_PUBLIC_METRO_PORT: slot.metroPort,
+      // Kept across restarts: `pnpm guide serve --set-help-url` points the app's Help row at this slot's guides site.
+      EXPO_PUBLIC_GUIDES_URL: readEnv(MOBILE_ENV).EXPO_PUBLIC_GUIDES_URL,
     },
     header,
   );

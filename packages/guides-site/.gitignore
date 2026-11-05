@@ -1,0 +1,5 @@
+# Written by `pnpm guide render` from the captures (scripts/guide/render.mjs): never committed
+src/content/docs/
+src/generated/
+public/
+.astro/

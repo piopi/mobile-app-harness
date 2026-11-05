@@ -1,0 +1,40 @@
+---
+// The landing (the site's index): search, then one card per audience. The index is a way in, not an answer: search
+// lists the guides themselves.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import site, { href } from '../lib/site.mjs';
+
+const w = site.words;
+---
+
+<StarlightPage frontmatter={{ title: w.title, description: w.intro, template: 'splash', pagefind: false, hero: { title: w.title, tagline: w.intro } }}>
+  <div class="landing">
+    <button type="button" class="search-cta rise" style="--i: 0" data-open-search>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 256 256"
+        ><path
+          fill="currentColor"
+          d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"
+        ></path></svg
+      >
+      <span>{w.search}</span>
+      <kbd>Ctrl K</kbd>
+    </button>
+
+    <section aria-labelledby="find">
+      <h2 id="find" class="section-title rise" style="--i: 1">{w.audiencesTitle}</h2>
+      <ul class="tiles">
+        {
+          site.audiences.map((a, i) => (
+            <li class="rise" style={`--i: ${i + 2}`}>
+              <a class="tile" href={href(`${a.id}/`)}>
+                <span class="tile-name">{a.name}</span>
+                <span class="tile-count">{a.count}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      {site.glossary && <a class="more" href={href(site.glossary.href)}>{site.glossary.link} →</a>}
+    </section>
+  </div>
+</StarlightPage>

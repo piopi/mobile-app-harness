@@ -1,0 +1,23 @@
+# An example guide: replace it with the app's first real flow. Captions are placeholder copy until the human approves them.
+title: Browsing items
+audience: users
+summary: Find an item and open it.
+copy: placeholder
+scenario: base
+order: 1
+open: items
+covers:
+  - 'apps/mobile/src/app/(tabs)/items/index.tsx'
+  - 'apps/mobile/src/app/(tabs)/items/[id].tsx'
+  - 'apps/mobile/src/features/items/copy.ts'
+setup:
+  - runFlow: ../_user.yaml
+steps:
+  - caption: Tap Items to see everything published.
+    do:
+      - tapOn: Items
+      - extendedWaitUntil: { visible: { id: items-list }, timeout: 15000 }
+  - caption: Tap an item to read it.
+    do:
+      - tapOn: Welcome
+      - extendedWaitUntil: { visible: { id: item-screen }, timeout: 15000 }

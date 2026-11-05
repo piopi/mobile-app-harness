@@ -1,0 +1,22 @@
+# An example guide for admins: replace it with a real admin flow. Captions are placeholder copy until the human approves them.
+title: Finding drafts
+audience: admins
+summary: See the items that aren't published yet.
+copy: placeholder
+scenario: base
+order: 1
+open: items
+covers:
+  - 'apps/mobile/src/app/(tabs)/items/index.tsx'
+  - 'apps/mobile/src/features/items/copy.ts'
+setup:
+  - runFlow: ../_admin.yaml
+  - tapOn: Items
+  - extendedWaitUntil: { visible: { id: items-list }, timeout: 15000 }
+steps:
+  - caption: Admins see every item. Drafts carry a Draft tag.
+    do: []
+  - caption: Tap Drafts to see only what isn't published yet.
+    do:
+      - tapOn: { id: filter-drafts }
+      - extendedWaitUntil: { visible: Draft item, timeout: 10000 }

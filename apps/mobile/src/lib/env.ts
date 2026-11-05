@@ -13,4 +13,10 @@ export const env = {
   /** Google OAuth client ids: the web one (Supabase verifies its tokens) and the iOS one. */
   googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
   googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '',
+  /**
+   * The how-to guides site the Me tab's Help row opens; empty hides the row. Locally `pnpm guide serve --set-help-url`
+   * writes it; a real build sets it in the EAS environment. A project that wants admins to change it moves it into
+   * project data (how-to-guide skill, "Help in the app").
+   */
+  guidesUrl: process.env.EXPO_PUBLIC_GUIDES_URL ?? '',
 };
