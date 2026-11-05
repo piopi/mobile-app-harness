@@ -1,16 +1,22 @@
 name: ci
 
+# Docs, skills, screenshots and Maestro flows alone don't run the suite (the pr-body check still runs on every PR):
+# CI minutes are metered on a private repo.
 on:
   pull_request:
+    paths-ignore: ['**/*.md', 'docs/**', '.agents/**', '**/*.png', '**/*.jpg', 'apps/mobile/.maestro/**']
   push:
     branches: [main]
+    paths-ignore: ['**/*.md', 'docs/**', '.agents/**', '**/*.png', '**/*.jpg', 'apps/mobile/.maestro/**']
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  typecheck:
+  # Typecheck and lint share one job: each is ~25 s, and a job's setup costs about as much.
+  static:
+    name: typecheck + lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -22,18 +28,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
-
-  lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
   unit:
@@ -48,6 +42,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
+      # The Edge Functions' own tests (deno check + deno test).
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.8
+      - run: pnpm test:functions
 
   integration:
     name: integration (Supabase + pgTAP)
@@ -57,6 +56,8 @@ jobs:
       SUPABASE_EXPERIMENTAL_STACK: '1'
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -68,7 +69,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Start Supabase (stack mode) and write .env.local
         run: pnpm sb start
+      # Several minutes once there are many scenarios: only when the database side changed in a PR, and always on main.
+      - name: Did the database change?
+        id: db
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ] || git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -q '^supabase/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Every seed scenario applies
+        if: steps.db.outputs.changed == 'true'
         run: |
           for s in $(ls supabase/seeds/scenarios | sed 's/\.sql$//'); do pnpm -s seed "$s"; done
       - name: Reset to the base seed
@@ -77,6 +86,10 @@ jobs:
         run: pnpm test:db
       - name: Vitest against the local API
         run: pnpm test:integration
+      # The functions' own output (a worker over its CPU or memory limit answers 546 with no detail in the test).
+      - name: Edge Function logs
+        if: failure()
+        run: for c in $(docker ps -a --format '{{.Names}}' | grep -- '-functions-'); do docker logs --tail 400 "$c" 2>&1; done || true
       - name: Stop
         if: always()
         run: supabase stack stop || true

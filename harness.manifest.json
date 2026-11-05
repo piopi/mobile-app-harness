@@ -45,6 +45,13 @@
     "packages/ui/scripts/",
     "packages/ui/src/lib/utils.ts",
     "packages/ui/src/motion/animated.ts",
-    "supabase/tests/integration/helpers/"
+    "supabase/tests/integration/helpers/",
+    "docs/release.md",
+    ".changeset/config.json",
+    "apps/mobile/fingerprint.config.js",
+    "supabase/functions/_shared/supabase-auth.ts",
+    "supabase/functions/_shared/supabase-auth.test.ts",
+    "supabase/functions/_shared/pem.ts",
+    "supabase/functions/_shared/pem.test.ts"
   ]
 }

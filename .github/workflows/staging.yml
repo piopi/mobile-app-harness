@@ -1,0 +1,50 @@
+name: staging
+
+# Merging to main deploys the backend to the staging Supabase project (docs/release.md): migrations, then the Edge
+# Functions. Preview builds point at staging. Only when supabase/ changed (CI minutes are metered); run it by hand from
+# the Actions tab to redeploy. Skipped cleanly until the STAGING_* repository secrets exist.
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/migrations/**', 'supabase/functions/**', 'supabase/config.toml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time, in merge order; never cancel one half-way through its migrations.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.STAGING_SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}
+    steps:
+      - name: Is staging set up?
+        id: secrets
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_PROJECT_REF" ] && [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No STAGING_* Supabase secrets yet (docs/release.md, Setup): nothing deployed."
+          fi
+      - uses: actions/checkout@v7
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@v7
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version-file: .nvmrc
+      - uses: supabase/setup-cli@v3
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          version: 2.122.0
+      - name: Migrations and Edge Functions to staging
+        if: steps.secrets.outputs.ready == 'true'
+        run: node scripts/release.mjs deploy-backend

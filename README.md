@@ -40,7 +40,7 @@ harness.config.json  the app's identity and brand starting point
 
 ## Run it locally
 
-Prerequisites: macOS with Xcode and an iOS simulator, Android SDK (optional), Docker Desktop running, Node 22, pnpm 10, Supabase CLI 2.122.0, Maestro (optional), ffmpeg (for demos).
+Prerequisites: macOS with Xcode and an iOS simulator, Android SDK (optional), Docker Desktop running, Node 22, pnpm 10, Supabase CLI 2.122.0, Deno 2 (Edge Function tests), Maestro (optional), ffmpeg (for demos).
 
 ```sh
 pnpm install
@@ -56,10 +56,15 @@ Seeded accounts (password `password123`): `admin@app.test`, `staff@app.test`, `m
 ```sh
 pnpm typecheck && pnpm lint && pnpm test:unit
 pnpm test:integration && pnpm test:db   # needs `pnpm wt up` or `pnpm sb start`
+pnpm test:functions                     # Edge Functions' shared code (Deno)
 pnpm e2e                                # Maestro, on your slot's device
 ```
 
-CI runs typecheck, lint, unit and integration tests on every pull request.
+CI runs typecheck, lint, unit and integration tests on every pull request that changes code (docs, skills, screenshots and Maestro flows alone skip it), and `pr-body` checks every PR's title, required sections and changeset.
+
+## Releases
+
+`main` deploys the backend to staging; merging `main` into `production` releases: an over-the-air update when the native fingerprint matches a store build, a store build submitted to TestFlight and Google Play internal testing when it doesn't. Every user-facing PR adds a changeset (`pnpm changeset`). See what a release would do with `pnpm release plan --dry-run`. Setup, the store steps and rollback: [docs/release.md](docs/release.md). Debugging a hosted Supabase project's logs: the db-change skill.
 
 ## The harness config
 

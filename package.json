@@ -21,9 +21,13 @@
     "link": "node scripts/link.mjs",
     "agent": "node scripts/link.mjs --agent",
     "harness:apply": "node scripts/harness/apply.mjs",
-    "harness:diff": "node scripts/harness/diff.mjs"
+    "harness:diff": "node scripts/harness/diff.mjs",
+    "test:functions": "deno check --no-lock supabase/functions && deno test --allow-all --no-lock supabase/functions",
+    "changeset": "changeset",
+    "release": "node scripts/release.mjs"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.3",
     "@eslint/js": "10.0.1",
     "@supabase/supabase-js": "2.118.0",
     "@types/node": "22.20.5",

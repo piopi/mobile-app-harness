@@ -18,7 +18,8 @@ The harness gets better only if every agent leaves it a little more accurate tha
    - ran a command that failed for a reason that wasn't your code (a port, a slot, a cache, a flag, an env value);
    - were corrected by the human, CI or a reviewer about a rule you didn't know;
    - read an instruction that was wrong, out of date, or contradicted by the code;
-   - did something by hand that a script could have done or checked.
+   - did something by hand that a script could have done or checked;
+   - skipped or forgot a step a skill asks for (the delight pass, a doc update, a guide, Android parity).
 
 2. **Sort each item into one place.** Keep the harness lean: AGENTS.md holds only what an agent can't find by looking.
 

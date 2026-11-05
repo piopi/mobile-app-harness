@@ -1,0 +1,130 @@
+name: release
+
+# Merging main into `production` releases (docs/release.md):
+#   plan            version, notes and the native fingerprint per platform → OTA update or store build
+#   staging-check   refuse unless staging has applied every migration of this commit
+#   backend         migrations and Edge Functions to the production Supabase project (after its reviewers, if any)
+#   ship            `eas update` (fingerprint unchanged) or `eas build --auto-submit` (TestFlight, Play internal
+#                   testing), then the v<version> tag and GitHub release. EAS builds run on Expo's servers.
+#
+# Dry runs change nothing on EAS or Supabase and need no secrets: run this workflow by hand (dry_run is on by default),
+# and every PR that changes the pipeline runs one.
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Print the decision and the commands only (a real release also needs the production branch)
+        type: boolean
+        default: true
+  pull_request:
+    paths: ['.github/workflows/release.yml', 'scripts/release.mjs', 'scripts/release/**', 'apps/mobile/eas.json', '.changeset/config.json']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+env:
+  # Real only for a push to production, or a hand run on production with dry_run off.
+  DRY_RUN: ${{ !(github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && github.ref == 'refs/heads/production')) }}
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+  # `eas` reads the project from the app config (app.config.ts); the id isn't secret.
+  EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+  EAS_OWNER: ${{ vars.EAS_OWNER }}
+  # Comma-separated; empty ships both. Set it to `ios` until the Google Play account exists.
+  RELEASE_PLATFORMS: ${{ vars.RELEASE_PLATFORMS }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      action: ${{ steps.plan.outputs.action }}
+      plan: ${{ steps.plan.outputs.plan }}
+      dry_run: ${{ steps.plan.outputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # The fingerprint reads the app's native dependencies, so the app's packages must be installed.
+      - run: pnpm install --frozen-lockfile
+      - uses: expo/expo-github-action@v9
+        if: env.EXPO_TOKEN != ''
+        with:
+          eas-version: 27.4.1
+          packager: npm
+          token: ${{ env.EXPO_TOKEN }}
+      - name: Decide (OTA update or store build)
+        id: plan
+        run: node scripts/release.mjs plan
+
+  staging-check:
+    needs: plan
+    if: needs.plan.outputs.dry_run == 'false' && needs.plan.outputs.action == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.STAGING_SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.122.0
+      - run: node scripts/release.mjs staging-check
+
+  backend:
+    name: deploy production backend
+    needs: [plan, staging-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.PRODUCTION_SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.122.0
+      - run: node scripts/release.mjs deploy-backend
+
+  ship:
+    name: ship the app
+    needs: [plan, backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      RELEASE_PLAN: ${{ needs.plan.outputs.plan }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # `eas update` bundles the app here; `eas build` only uploads the project to Expo's servers (--no-wait).
+      - run: pnpm install --frozen-lockfile
+      - uses: expo/expo-github-action@v9
+        with:
+          eas-version: 27.4.1
+          packager: npm
+          token: ${{ env.EXPO_TOKEN }}
+      - run: node scripts/release.mjs ship
