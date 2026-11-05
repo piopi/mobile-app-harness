@@ -1,0 +1,6 @@
+---
+// Guide pages keep Starlight's title; the landing and audience pages put theirs in their hero.
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+---
+
+{!Astro.locals.starlightRoute.entry.data.hero && <Default />}

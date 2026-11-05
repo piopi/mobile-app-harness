@@ -12,11 +12,12 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "lint": "eslint . && node scripts/check-one-off-styles.mjs",
     "test": "pnpm test:unit",
-    "test:unit": "vitest run --project shared --project harness && pnpm -r --filter @app/ui --filter @app/mobile test",
+    "test:unit": "vitest run --project shared --project harness --project guides && pnpm -r --filter @app/ui --filter @app/mobile test",
     "test:integration": "node scripts/with-env.mjs vitest run --project integration",
     "test:db": "supabase test db --local",
     "e2e": "node scripts/maestro.mjs",
     "demo": "node scripts/demo.mjs",
+    "guide": "node scripts/guide.mjs",
     "reference": "node scripts/reference.mjs",
     "link": "node scripts/link.mjs",
     "agent": "node scripts/link.mjs --agent",
@@ -40,6 +41,7 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.0",
     "vite": "8.3.5",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "yaml": "2.9.1"
   }
 }

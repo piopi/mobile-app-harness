@@ -1,0 +1,30 @@
+# Guide impact: a PR that changes a screen a how-to guide shows (the guide's `covers`) but not the guide fails until
+# the guide is updated or the description names it on a `Guides:` line with a reason. Re-runs when the description is
+# edited. The paths are where `covers` may point (the guides' unit tests hold them to it).
+name: guide-impact
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    paths: ['apps/mobile/src/**', 'packages/ui/src/**', 'apps/mobile/.maestro/guides/**', 'scripts/guide/**', 'scripts/guide.mjs']
+
+concurrency:
+  group: guide-impact-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  impact:
+    name: guide impact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/guide/impact.mjs "${{ github.base_ref }}"

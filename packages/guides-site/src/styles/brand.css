@@ -1,0 +1,100 @@
+/*
+ * The guides site in the app's look: Starlight's colours mapped to the app's tokens (src/generated/tokens.css, from
+ * packages/ui/src/theme.css, both appearances), the guide page's layout (a phone screen beside each caption), and
+ * quiet motion: steps rise in as they scroll into view, the progress line fills, the closing line lands. Everything
+ * is a short fade with reduced motion. A project brands it further here (fonts, shapes), never in the generated files.
+ */
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  --sl-color-bg: var(--color-background);
+  --sl-color-bg-nav: var(--color-background);
+  --sl-color-bg-sidebar: var(--color-background);
+  --sl-color-bg-inline-code: var(--color-surface);
+  --sl-color-hairline: var(--color-hairline);
+  --sl-color-hairline-light: var(--color-hairline);
+  --sl-color-hairline-shade: var(--color-hairline);
+  --sl-color-text: var(--color-foreground);
+  --sl-color-white: var(--color-foreground);
+  --sl-color-gray-1: var(--color-foreground);
+  --sl-color-gray-2: var(--color-foreground);
+  --sl-color-gray-3: var(--color-muted-foreground);
+  --sl-color-gray-4: var(--color-muted-foreground);
+  --sl-color-gray-5: var(--color-control);
+  --sl-color-gray-6: var(--color-surface);
+  --sl-color-black: var(--color-background);
+  --sl-color-accent: var(--color-primary);
+  --sl-color-accent-high: var(--color-primary);
+  --sl-color-accent-low: var(--color-surface-elevated);
+  --sl-color-text-accent: var(--color-primary);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-reveal: 520ms;
+  --t-stagger: 60ms;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rise { animation: rise var(--t-reveal) var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--t-stagger) + 80ms); }
+.js .reveal,
+.js .guide-steps > ol > li { opacity: 0; transform: translateY(12px); transition: opacity var(--t-reveal) var(--ease-out), transform var(--t-reveal) var(--ease-out); }
+.js .reveal.in,
+.js .guide-steps > ol > li.in { opacity: 1; transform: none; }
+a:focus-visible, video:focus-visible, button:focus-visible { outline: 2px solid var(--color-foreground); outline-offset: 3px; }
+
+/* The landing and audience pages */
+.landing { display: grid; gap: 2rem; max-width: 56rem; margin-inline: auto; }
+.search-cta { display: flex; align-items: center; gap: 0.75rem; min-height: 48px; padding: 0 1rem; border: 1px solid var(--color-control); border-radius: 10px; background: var(--color-surface); color: var(--color-muted-foreground); font: inherit; cursor: pointer; }
+.search-cta kbd { margin-inline-start: auto; font-size: 0.75rem; }
+.section-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 1rem; }
+.tiles { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.tile { display: grid; gap: 0.25rem; padding: 1.25rem; border: 1px solid var(--color-hairline); border-radius: 16px; background: var(--color-surface); text-decoration: none; color: var(--color-foreground); transition: border-color 150ms, transform 150ms var(--ease-out); }
+.tile:hover { border-color: var(--color-control); }
+.tile:active { transform: scale(0.98); }
+.tile-name { font-weight: 700; font-size: 1.125rem; }
+.tile-count, .guide-count, .guide-summary, .guide-kicker, .num, .empty { color: var(--color-muted-foreground); font-size: 0.875rem; }
+.more { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--color-foreground); }
+.more:hover { text-decoration: underline; }
+.guide-rows { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+.guide-row { display: grid; grid-template-columns: auto 1fr 4.5rem; gap: 1rem; align-items: center; padding: 0.75rem 1rem; border: 1px solid var(--color-hairline); border-radius: 16px; text-decoration: none; color: var(--color-foreground); }
+.guide-row:hover { border-color: var(--color-control); }
+.guide-row-text { display: grid; gap: 0.125rem; }
+.guide-name { font-weight: 700; }
+.guide-thumb { width: 4.5rem; height: auto; border-radius: 10px; border: 1px solid var(--color-hairline); }
+.guide-badge { display: inline-block; font-size: 0.6875rem; border: 1px solid var(--color-control); border-radius: 6px; padding: 1px 7px; margin-inline-start: 8px; }
+.sl-markdown-content > .guide-badge { margin-inline-start: 0; }
+
+/* A guide: the kicker, the progress line, then each step's caption beside its screen */
+.sl-markdown-content .guide-kicker { margin: 0; }
+.sl-markdown-content .guide-lede { color: var(--color-muted-foreground); font-size: 1.125rem; }
+.guide-open { display: inline-flex; min-height: 44px; align-items: center; font-weight: 600; }
+.guide-progress { position: sticky; top: var(--sl-nav-height); z-index: 1; height: 3px; background: var(--color-hairline); border-radius: 2px; overflow: hidden; }
+.guide-progress span { display: block; height: 100%; background: var(--color-primary); transform-origin: left; transform: scaleX(var(--done, 0)); transition: transform 400ms var(--ease-out); }
+.guide-steps ol { padding-inline-start: 1.25rem; display: grid; gap: 2.5rem; }
+.guide-steps li { font-size: 1.0625rem; }
+.phone { margin-top: 1rem; max-width: 20rem; }
+.phone img, .phone video { width: 100%; height: auto; border-radius: 22px; border: 1px solid var(--color-hairline); display: block; }
+@media (min-width: 50rem) {
+  .guide-steps li { display: grid; grid-template-columns: 1fr 20rem; gap: 2rem; align-items: start; }
+  .phone { margin-top: 0; }
+}
+.guide-done { font-weight: 700; font-size: 1.25rem; opacity: 0.4; transition: opacity var(--t-reveal) var(--ease-out); }
+.guide-done.landed { opacity: 1; }
+a.term { text-decoration: underline dotted; text-underline-offset: 3px; color: inherit; }
+a.term:hover::after { content: attr(data-def); position: absolute; max-width: 18rem; margin-top: 1.75rem; margin-inline-start: -4rem; padding: 0.5rem 0.75rem; border-radius: 10px; background: var(--color-surface-elevated); border: 1px solid var(--color-hairline); font-size: 0.875rem; color: var(--color-foreground); z-index: 2; }
+.brand-foot { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; font-size: 0.875rem; color: var(--color-muted-foreground); }
+.brand-foot a { color: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation-name: none; }
+  .js .reveal, .js .guide-steps > ol > li { transform: none; transition-duration: 150ms; }
+  .guide-progress span { transition: none; }
+}
+
+@media print {
+  .guide-progress, .guide-open, header, .sidebar-pane, .brand-foot, .pagination-links { display: none !important; }
+  .js .guide-steps > ol > li { opacity: 1; transform: none; }
+  .guide-steps li { break-inside: avoid; }
+}
