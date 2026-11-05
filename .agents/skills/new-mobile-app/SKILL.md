@@ -97,7 +97,7 @@ git push && gh run watch
 
 ## 7. Hand over
 
-Tell the human, briefly: the repo URL, what was applied, the smoke result (with the screenshot path), the `PROJECT:` slots still open (brand paragraph and decisions in the design-system skill, glossary, voice), and the account checklist they will need before release (Apple developer, Google Play, a hosted Supabase project, Sign in with Apple and Google ids): offer to open it as one issue.
+Tell the human, briefly: the repo URL, what was applied, the smoke result (with the screenshot path), the `PROJECT:` slots still open (brand paragraph and decisions in the design-system skill, glossary, voice), and the account checklist they will need before release (Apple developer, Google Play, EAS, staging and production Supabase projects, the repository secrets, Sign in with Apple and Google ids; `docs/release.md` "Setup" lists them): offer to open it as one issue.
 
 Then ask (AskUserQuestion): **Chart a wayfinder map now?** · Yes, run `/mattpocock-skills:wayfinder` with the app's goal · Not yet. On yes, invoke it.
 

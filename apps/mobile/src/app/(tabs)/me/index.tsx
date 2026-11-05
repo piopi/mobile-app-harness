@@ -1,14 +1,19 @@
 import { displayName } from '@app/shared';
 import { ActionSheet, Avatar, Badge, ListRow, Screen, SectionHeader, Stack, Text } from '@app/ui';
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useUniwind } from 'uniwind';
 import { SignOutButton } from '../../../features/auth/sign-out-button';
 import { ME } from '../../../features/me/copy';
 import { setAppearance, type AppearanceChoice } from '../../../lib/appearance';
+import { env } from '../../../lib/env';
 import { useSession } from '../../../lib/session';
 
-/** Profile and settings: who is signed in, Appearance (System / Light / Dark), sign out, and the dev panel in dev builds. */
+/**
+ * Profile and settings: who is signed in, Appearance (System / Light / Dark), Help (the how-to guides site, when one
+ * is set), sign out, and the dev panel in dev builds.
+ */
 export default function Me() {
   const { theme, hasAdaptiveThemes } = useUniwind();
   const { launch, email, roles } = useSession();
@@ -38,6 +43,7 @@ export default function Me() {
       <Stack gap="none">
         <SectionHeader title={ME.settings} size="sm" />
         <ListRow title={ME.appearance} trailing={ME.appearanceLabel[appearance]} onPress={() => setAppearanceOpen(true)} testID="me-appearance" />
+        {env.guidesUrl ? <ListRow title={ME.help} arrow onPress={() => void Linking.openURL(env.guidesUrl)} testID="me-help" /> : null}
         {__DEV__ ? <ListRow title={ME.devPanel} arrow onPress={() => router.push('/me/dev')} testID="me-dev" /> : null}
         <SignOutButton as="row" testID="me-sign-out" />
       </Stack>

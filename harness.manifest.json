@@ -45,6 +45,21 @@
     "packages/ui/scripts/",
     "packages/ui/src/lib/utils.ts",
     "packages/ui/src/motion/animated.ts",
-    "supabase/tests/integration/helpers/"
+    "supabase/tests/integration/helpers/",
+    "docs/release.md",
+    ".changeset/config.json",
+    "apps/mobile/fingerprint.config.js",
+    "supabase/functions/_shared/supabase-auth.ts",
+    "supabase/functions/_shared/supabase-auth.test.ts",
+    "supabase/functions/_shared/pem.ts",
+    "supabase/functions/_shared/pem.test.ts",
+    ".agents/skills/how-to-guide/",
+    "packages/guides-site/astro.config.mjs",
+    "packages/guides-site/src/components/",
+    "packages/guides-site/src/content.config.mjs",
+    "packages/guides-site/src/lib/",
+    "packages/guides-site/src/pages/",
+    "apps/mobile/.maestro/guides/_user.yaml",
+    "apps/mobile/.maestro/guides/_admin.yaml"
   ]
 }

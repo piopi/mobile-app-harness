@@ -1,0 +1,41 @@
+---
+// An audience's page (`/users/`, `/admins/`): the app's Help link can open these. Each guide with its first screen.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import site, { href } from '../lib/site.mjs';
+
+export function getStaticPaths() {
+  return site.audiences.map((a) => ({ params: { audience: a.id }, props: { audience: a } }));
+}
+const { audience } = Astro.props;
+const w = site.words;
+---
+
+<StarlightPage frontmatter={{ title: audience.name, template: 'splash', pagefind: false, hero: { title: audience.name, tagline: audience.count } }}>
+  <div class="landing">
+    {
+      audience.guides.length ? (
+        <ol class="guide-rows">
+          {audience.guides.map((g, i) => (
+            <li class="rise" style={`--i: ${i}`}>
+              <a class="guide-row" href={href(g.href)}>
+                <span class="num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="guide-row-text">
+                  <span class="guide-name">{g.title}</span>
+                  {g.summary && <span class="guide-summary">{g.summary}</span>}
+                  <span class="guide-count">
+                    {g.steps}
+                    {g.draft && <span class="guide-badge">{w.draft}</span>}
+                  </span>
+                </span>
+                <img class="guide-thumb" src={href(g.thumb)} alt="" width="804" height="1748" loading="lazy" decoding="async" />
+              </a>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="empty">{w.noGuides}</p>
+      )
+    }
+    <a class="more" href={href()}>← {w.title}</a>
+  </div>
+</StarlightPage>

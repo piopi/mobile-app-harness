@@ -8,7 +8,11 @@ export default defineConfig({
       },
       {
         // The harness scripts' own logic (harness:apply, harness:diff, the icon writer).
-        test: { name: 'harness', include: ['scripts/**/*.test.mjs'] },
+        test: { name: 'harness', include: ['scripts/**/*.test.mjs'], exclude: ['scripts/guide/**'] },
+      },
+      {
+        // The how-to guides: the guide format, the flows it generates, the site it renders and the impact check.
+        test: { name: 'guides', include: ['scripts/guide/**/*.test.mjs'] },
       },
       {
         // Runs against this worktree's local Supabase stack (`pnpm sb start`); loaded via scripts/with-env.mjs.

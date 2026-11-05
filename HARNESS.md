@@ -19,7 +19,7 @@ The playbook behind this template: what each piece of the agent harness is, **wh
 11. [Maestro and demo videos](#11-maestro-and-demo-videos)
 12. [UI: packages/ui, native chrome, lint](#12-ui-packagesui-native-chrome-lint)
 13. [Data: capabilities, RPCs, types](#13-data-capabilities-rpcs-types)
-14. [Tests and CI](#14-tests-and-ci)
+14. [Tests, CI and releases](#14-tests-ci-and-releases)
 15. [PRs, merge policy, deferred work, feature docs](#15-prs-merge-policy-deferred-work-feature-docs)
 16. [Porting a reference app (optional)](#16-porting-a-reference-app-optional)
 17. [Dependencies](#17-dependencies)
@@ -73,7 +73,16 @@ What each tool is, in plain words, and what this template uses it for.
 | **pgTAP** | Tests written inside the database | Security rules and database functions |
 | **Maestro** | Scripted flows on a simulator or emulator | End-to-end flows (sign in, onboarding) and the saved demo videos |
 | **ESLint** | A code checker | Code style and the template's own rules (native navigation only, no system pop-ups, no one-off styles) |
-| **GitHub Actions** | Automatic checks on GitHub | Type checks, lint, unit tests, and the backend and database tests on every pull request |
+| **GitHub Actions** | Automatic checks on GitHub | Type checks, lint, unit tests, and the backend and database tests on every pull request; the PR rules; staging deploys and releases |
+| **Deno** | The runtime of Supabase Edge Functions | Type-checking and testing the functions' shared code (`pnpm test:functions`) |
+
+### Shipping
+
+| Technology | What it is | Used for |
+|---|---|---|
+| **EAS** (Expo Application Services) | Expo's build, submit and update service | Store builds on Expo's servers, submission to TestFlight and Google Play, over-the-air updates |
+| **expo-updates** | Over-the-air updates of the app's JavaScript | Shipping a fix without a store review when the native fingerprint is unchanged |
+| **Changesets** | Versioning from one sentence per change | The version bump, the changelog, the release notes and the update message |
 
 ### The agent harness
 
@@ -153,14 +162,16 @@ What each tool is, in plain words, and what this template uses it for.
 
 ## 5. The shared native build cache
 
-**What.** `buildCacheProvider: expo/local-build-cache-provider` with `cacheDir: ~/.<slug>/build-cache`, shared by every worktree. `wt up` computes the Expo fingerprint of `apps/mobile`; on a hit it installs the cached `.app` / `.apk` in seconds; on a miss it takes a machine-wide lock per platform, checks again, builds once, and publishes.
+**What.** `buildCacheProvider: expo/local-build-cache-provider` with `cacheDir: ~/.<slug>/build-cache`, shared by every worktree. `wt up` computes the Expo fingerprint of `apps/mobile`; on a hit it installs the cached `.app` / `.apk` in seconds; on a miss it takes a lock per fingerprint and one of two machine-wide build slots, checks again, builds once, and publishes.
 
 **Why.** Native builds are the slowest thing in the loop (4–5 minutes) and the heaviest on the CPU. Two worktrees with the same native inputs should never both compile.
 
 **Lessons.**
 
 - The provider's default cache is per worktree, which defeats sharing: set `cacheDir`.
-- Its upload deletes the old entry then copies, which isn't atomic: two builds of one fingerprint can race and a reader can install a half-copied app. The per-platform lock covers both the race and CPU starvation.
+- Its upload deletes the old entry then copies, which isn't atomic: two builds of one fingerprint can race and a reader can install a half-copied app. The per-fingerprint lock covers the race; the two build slots cap CPU load.
+- `expo run:ios` only prebuilds when `ios/` is missing, so a worktree that had built once compiled a changed splash or icon from its stale `ios/` and shipped the old splash. `wt` runs `expo prebuild --platform ios --no-install` before every native build.
+- **The fingerprint must agree across machines** once releases compare it with EAS (section 14): the cache path names each machine's home folder, so `apps/mobile/fingerprint.config.js` drops `buildCacheProvider` from the hashed config.
 - **Per-worktree values never go in `app.config.ts`.** The fingerprint hashes the resolved config; a slot number or port there gives every worktree its own fingerprint and nothing is shared. They travel as `EXPO_PUBLIC_*` in `apps/mobile/.env.local`, which `wt up` generates (a new worktree doesn't get untracked files, so it can't be copied).
 - **Never `expo start --clear`:** Metro's transform cache in `$TMPDIR/metro-cache` is shared by every worktree.
 - `rm -rf apps/mobile/ios apps/mobile/android` after a build frees disk; the cache keeps the binary.
@@ -212,7 +223,9 @@ What each tool is, in plain words, and what this template uses it for.
 - **One Android emulator machine-wide** (`wt up --android` refuses a second). Boot it only for the final parity pass, take every Android shot in one batch, kill it.
 - **At most two feature agents at a time**, each in its own slot.
 - `wt up` warns when the 5-minute load is above the core count.
-- **Native builds run at background priority:** `wt` wraps `expo run:ios` and Gradle in `taskpolicy -b` (efficiency cores only) and caps Gradle at `--max-workers=4`. A full Xcode build otherwise runs ~30 compilers on every core. Agents never start `expo run:*` or `xcodebuild` themselves.
+- **Native builds run at full speed, two at most:** `wt` first wrapped `expo run:ios` and Gradle in `taskpolicy -b` (efficiency cores only). The laptop stayed cool, but cold builds took several times longer and every waiting agent sat idle, so builds now run at full speed with at most two at once machine-wide (`WT_NATIVE_BUILDS`). Agents never start `expo run:*` or `xcodebuild` themselves.
+- **Docker Desktop wedges** now and then (after sleep, an update, a full disk): every `docker` and `supabase stack` call hangs silently. `sb start` and `wt up` ask `docker info` with a timeout first and print the recovery steps.
+- **Metro keeps the dependency tree it started with:** after a pull or `pnpm add` it failed with "Unable to resolve module". `wt up` restarts the slot's Metro when `pnpm-lock.yaml` changed since it started.
 - **Disk is the binding constraint.** With 2–5 GB free and 16 GB of swap, Android builds failed twice with "No space left on device"; the shared AVD's `/data` was 98 % full. Keep 10 GB free; delete generated native folders after a build.
 - A cost of the cap: Android shots were sometimes left stale because the emulator was off to cool the laptop. List stale shots in the PR rather than hiding them.
 
@@ -237,6 +250,8 @@ What each tool is, in plain words, and what this template uses it for.
 **Maestro.** One flow per critical path in `apps/mobile/.maestro/`, with `# scenario: <name>` (the runner seeds it first) and `${APP_ID}` / `${SCHEME}` / `${METRO_PORT}` from `pnpm e2e`, so flows never hard-code the app's identity. A flow takes 25–27 s. Sign-in codes are read from Mailpit over HTTP (`scripts/mailpit-code.js`).
 
 **Demos.** `pnpm demo prep|start|stop|run` and the demo-video skill: the agent drives the app tap by tap while agent-device records (taps drawn), then ffmpeg cuts every still stretch to 1.4 s (a 33 s take became 13 s; Android 42 s became 12 s), with a 9:41 status bar and seeded data. Saved demos replay from Maestro. Reviewing each take's contact sheet found two bugs: the dev tools button showing on Android (fixed by `demo prep`) and a trailing still escaping the cut (fixed by converting to a constant frame rate before still detection). Videos stay local (`demos-out/`, gitignored); sending them is the human's call.
+
+**How-to guides.** User help is captured from the app, never written beside it. Each guide is one YAML file in `apps/mobile/.maestro/guides/<audience>/<slug>.yaml`: a seed scenario, then captioned steps, each reached by Maestro steps. `pnpm guide check` runs every guide on a device (`--static` checks the files only), `pnpm guide build` captures the screenshots and renders a searchable Astro Starlight site (`packages/guides-site`, output in `guides-out/`), and the app's Help row opens it through `EXPO_PUBLIC_GUIDES_URL`. CI's `guide-impact` check names the guides a PR's changed screens touch, and the PR template's Guides section says whether they were updated (how-to-guide skill). A guide that stops running is a broken help page, so it fails like a test.
 
 ## 12. UI: packages/ui, native chrome, lint
 
@@ -272,7 +287,7 @@ What each tool is, in plain words, and what this template uses it for.
 
 **Onboarding is a PROJECT slot.** The template's profile is only a display name, `created_at` and `onboarded_at`, plus versioned terms. Domain fields (an age confirmation, a contact, a preference) are added per project with one recipe (the db-change skill, "Add an onboarding field or step"): a column, the `complete_onboarding` argument, the `launch_status` check when the app can't open without it, the zod schema, and a field or a step in the onboarding stack. One EXAMPLE field (`about`, optional) shows every place it touches and is meant to be replaced.
 
-## 14. Tests and CI
+## 14. Tests, CI and releases
 
 | Level | Tool | Where |
 |---|---|---|
@@ -282,13 +297,25 @@ What each tool is, in plain words, and what this template uses it for.
 | API contract | Vitest against the local stack | `supabase/tests/integration` |
 | Critical paths | Maestro, local | `apps/mobile/.maestro` |
 
-CI (`.github/workflows/ci.yml`) runs typecheck, lint, unit, and integration (stack start, **every scenario applies**, pgTAP, Vitest) on every PR, in ~2 minutes. **No device CI:** simulators in CI are slow and flaky for an agent team's PR volume; Maestro and screenshots are required locally by the PR template instead.
+CI (`.github/workflows/ci.yml`) runs typecheck + lint (one job: each takes ~25 s and a job's setup costs as much), unit (plus the Edge Functions' Deno tests), and integration (stack start, **every scenario applies**, pgTAP, Vitest). **No device CI:** simulators in CI are slow and flaky for an agent team's PR volume; Maestro and screenshots are required locally by the PR template instead.
+
+**The CI diet.** On a private repo, Actions minutes are metered. A PR that touches only docs, skills, screenshots or Maestro flows skips the suite (`paths-ignore`); the seed-every-scenario step (minutes, once there are many) runs only when `supabase/` changed, and always on main. Jest on CI's two cores finished in ~35 s and then waited ~5 minutes on an open handle, so `jest.base.js` sets `forceExit` on CI.
+
+**The PR's own rules** (`pr-body.yml`, `scripts/ci/pr-rules.mjs`, unit-tested): a Conventional Commit title (the squash commit keeps it, and the changelog reads well), the required sections (Summary, Delight, Tests) filled, and a changeset or "No user-facing change". It is a plain script, not a marketplace action, and re-runs when the description is edited, so an agent fixes the body without a push.
+
+**Releases** (`docs/release.md`). Changesets turns each user-facing PR's one sentence into the version bump, the changelog, the GitHub release notes and the OTA update message. Merging main into `production` runs `release.yml`: `plan` computes each platform's native fingerprint with the production EAS variables and asks EAS for a production build with it; a match ships `eas update` (JavaScript only, minutes), no match ships `eas build --auto-submit` (TestFlight, Play internal testing). The decision is a pure, tested function (`scripts/release/plan.mjs`) and every step has a `--dry-run`, so the pipeline is checked on every PR that touches it and by hand without secrets. Staging deploys from main (`staging.yml`), and the release refuses to run unless staging has applied every migration it ships: production never gets a migration staging hasn't. The backend deploys before the app. Secrets are prefixed repository secrets (`STAGING_*`, `PRODUCTION_*`) because GitHub's free plan has no Environments for private repos; with a paid plan, Environments add required reviewers. `RELEASE_PLATFORMS` ships iOS alone until a Play account exists.
+
+**Store lessons from the first releases:** TestFlight holds every build without `usesNonExemptEncryption: false`; Apple's upload rejects an NFC entitlement with `NDEF` (ITMS-90778), `TAG` alone still reads NDEF; EAS's free Android worker ran out of memory until `GRADLE_OPTS` capped Gradle and Kotlin; a release with no version bump collides with its existing tag, so `plan` refuses it with the fix.
+
+**Hosted-only failures.** New Supabase projects use `sb_secret_`/`sb_publishable_` keys, which are not JWTs: sent as a bearer, PostgREST answers 401. Local stacks still use legacy JWT keys, so a function that worked in every local test broke in production. All function calls to the project now go through `supabase/functions/_shared/supabase-auth.ts`, whose tests fake the hosted gateway. Logs of a hosted project: the Management API (db-change skill).
+
+**Time in tests.** Tests that hard-coded a weekday or a local hour broke on a Saturday and across a daylight-saving change; Postgres and Node also ship different tz databases and read one zone's local time differently. Expectations are computed with the same rules the code uses, in SQL.
 
 A flaky test caught by CI: a pgTAP test failed about 1 run in 64 because it "tampered" with a token by overwriting a character with `A`, which was sometimes already `A`. Tamper with a value guaranteed to differ.
 
 ## 15. PRs, merge policy, deferred work, feature docs
 
-- **One ticket, one worktree, one PR**, every template section filled: Summary (what a person notices), Context, Reference parity (optional), Scenarios (how to reproduce each state), Screenshots (SHA-pinned, default theme first, Android parity), Tests, Checklist.
+- **One ticket, one worktree, one PR**, every template section filled: Summary (what a person notices), Context, Changeset, Reference parity (optional), Delight, Scenarios (how to reproduce each state), Screenshots (SHA-pinned, default theme first, Android parity), Tests, Guides, Checklist. `pr-body` fails an empty Summary, Delight or Tests, a non-conventional title, or a missing changeset.
 - **Merge policy.** Foundation PRs (harness, data model, sign-in/onboarding, design system, docs) are squash-merged by the agent once CI is green. Feature PRs stack on their parent branch and the human merges. The earlier rule had the human merge everything, which blocked the foundation for no review value.
 - **File what you defer.** Incident: a sign-in PR noted two half-ported pieces only in its body; the human asked whether they'd ever be built. Now every deferral is a ticket comment or a new ticket before the PR opens, and the PR links it.
 - **Feature docs** (`docs/features/<capability>.md`): status, capabilities, what admins can customise, where it lives, ideas to expand, and a Screens section embedding the committed shots, so `docs/features/` doubles as the visual catalogue.
@@ -366,6 +393,15 @@ Keep the order of work: slots and the local backend first (everything else depen
 | AGENTS.md restating package.json and the tree | Pruned to non-discoverable gotchas |
 | Feature docs never read before work | "Where knowledge lives" read pointers |
 | Manual steps scattered across PRs | One checklist for the human, in one place |
+| Background-priority native builds: cool laptop, agents idle for long cold builds | Full speed, one build per fingerprint, two at most machine-wide |
+| A worktree's stale `ios/` shipped an old splash | `expo prebuild` before every iOS build |
+| Every release looked native: the fingerprint differed between a laptop, CI and EAS | `fingerprint.config.js` drops the build-cache path |
+| An Edge Function returned 401 only in production (new non-JWT keys sent as a bearer) | One headers helper for every call; tests fake the hosted gateway |
+| A signing key failed to import: `openssl pkcs12` "Bag Attributes" lines decoded as base64 | Parse only a PEM's body |
+| Tests failed on a Saturday and after a clock change | Expectations computed with the code's own time rules, in SQL |
+| Jest on CI waited ~5 min on an open handle | `forceExit` on CI |
+| Docs-only PRs spent CI minutes on the whole suite | `paths-ignore`, one static job, scenarios only when `supabase/` changed |
+| TestFlight held builds; Apple rejected NDEF; EAS Android ran out of memory | `usesNonExemptEncryption: false`, `TAG` only, capped `GRADLE_OPTS` |
 
 ## 22. Open problems
 

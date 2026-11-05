@@ -1,0 +1,12 @@
+# Shared guide setup (not a guide): the app open clean, signed in as the seeded admin (admin@app.test), on Home.
+appId: ${APP_ID}
+---
+- runFlow: ../demos/_open.yaml
+- runFlow:
+    file: ../subflows/sign-in-as.yaml
+    env:
+      EMAIL_JSON: '%7B%22email%22%3A%22admin%40app.test%22%7D'
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 20000

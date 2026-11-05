@@ -14,3 +14,6 @@ apps/mobile/android/
 .maestro-out/
 # Client demo videos (pnpm demo)
 demos-out/
+# The how-to guides site (pnpm guide build, Astro Starlight) and its captures: published by hand, never committed
+guides-out/
+guides-captures/

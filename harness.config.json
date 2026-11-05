@@ -20,6 +20,12 @@
     "template": "piopi/mobile-app-harness",
     "workspaceScope": "@app"
   },
+  "guides": {
+    "$comment": "The how-to guides site (how-to-guide skill). pagesRepo: the GitHub Pages repository `pnpm guide publish` copies the site into, as <owner>/<name> (a human creates it; empty until then, and publish refuses to run). base: the path it is served under (empty guesses it). glossary: the GLOSSARY.md terms the site shows, each {} or { \"text\": plain words, \"link\": false }.",
+    "pagesRepo": "",
+    "base": "",
+    "glossary": {}
+  },
   "backend": "supabase",
   "reference": null,
   "brand": {

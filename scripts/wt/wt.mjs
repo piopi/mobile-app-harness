@@ -11,11 +11,14 @@
 //
 // Slot k owns: Metro port 8100+k, simulator <slug>-wt-k (cloned from <slug>-golden, kept between sessions),
 // emulator port 5554+2k (Pixel_9, -read-only, on demand, one running machine-wide), its own Supabase stack.
+// Native builds: one per fingerprint at a time, at most two machine-wide (WT_NATIVE_BUILDS), at full speed.
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync, appendFileSync, cpSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { assertDockerResponsive } from '../lib/docker.mjs';
 import { APP, CONFIG, ROOT, readEnv, regenerateEnv } from '../lib/env.mjs';
 
 const HOME = APP.home;
@@ -74,6 +77,11 @@ function runAsync(command, argv, opts = {}) {
 const timings = [];
 async function step(name, fn) {
   const t0 = Date.now();
+  // A fresh worktree has no node_modules: install first (hardlinks from the store, ~10 s), or the fingerprint
+  // step fails on a missing @expo/fingerprint after the stack has already started.
+  if (!existsSync(path.join(ROOT, 'node_modules', '.modules.yaml'))) {
+    await step('pnpm install (fresh worktree)', () => run('pnpm', ['install', '--frozen-lockfile'], { cwd: ROOT }));
+  }
   const result = await fn();
   const s = (Date.now() - t0) / 1000;
   timings.push([name, s]);
@@ -93,25 +101,34 @@ function portListening(port) {
 }
 
 // ---------- locks (one native build per platform on this machine) ----------
-async function withLock(name, fn) {
+// Native builds that may run at once machine-wide, at full speed. Two is the measured sweet spot on a 14-core laptop:
+// background priority (taskpolicy -b) kept the machine cool but made a cold iOS build several times slower, and
+// waiting agents cost more than the heat. WT_NATIVE_BUILDS overrides.
+const NATIVE_BUILD_SLOTS = Math.max(1, Number(process.env.WT_NATIVE_BUILDS ?? 2));
+
+/** Hold one of `slots` numbered locks: `<name>` when slots is 1, else `<name>-1` … `<name>-N`. */
+async function withLock(name, fn, slots = 1) {
   mkdirSync(LOCKS, { recursive: true });
-  const dir = path.join(LOCKS, name);
+  const names = slots === 1 ? [name] : Array.from({ length: slots }, (_, i) => `${name}-${i + 1}`);
+  let dir;
   let waited = false;
   for (;;) {
-    try {
-      mkdirSync(dir);
-      writeFileSync(path.join(dir, 'owner'), `${process.pid} ${ROOT}\n`);
-      break;
-    } catch {
-      const owner = existsSync(path.join(dir, 'owner')) ? readFileSync(path.join(dir, 'owner'), 'utf8').split(' ')[0] : '';
-      if (owner && spawnSync('kill', ['-0', owner]).status !== 0) {
-        rmSync(dir, { recursive: true, force: true }); // stale lock from a dead process
-        continue;
+    for (const n of names) {
+      const d = path.join(LOCKS, n);
+      try {
+        mkdirSync(d);
+        writeFileSync(path.join(d, 'owner'), `${process.pid} ${ROOT}\n`);
+        dir = d;
+        break;
+      } catch {
+        const owner = existsSync(path.join(d, 'owner')) ? readFileSync(path.join(d, 'owner'), 'utf8').split(' ')[0] : '';
+        if (owner && spawnSync('kill', ['-0', owner]).status !== 0) rmSync(d, { recursive: true, force: true }); // stale lock from a dead process
       }
-      if (!waited) log(`waiting for the ${name} lock (held by pid ${owner})…`);
-      waited = true;
-      await sleep(2000);
     }
+    if (dir) break;
+    if (!waited) log(`waiting for a free ${name} slot (${slots} in use)…`);
+    waited = true;
+    await sleep(2000);
   }
   try {
     return await fn();
@@ -121,7 +138,17 @@ async function withLock(name, fn) {
 }
 
 async function waitForUnlocked(name) {
-  while (existsSync(path.join(LOCKS, name))) await sleep(2000);
+  const dir = path.join(LOCKS, name);
+  for (;;) {
+    if (!existsSync(dir)) return;
+    // A lock left by a build killed mid-way would otherwise stall this wait forever.
+    const owner = existsSync(path.join(dir, 'owner')) ? readFileSync(path.join(dir, 'owner'), 'utf8').split(' ')[0] : '';
+    if (owner && spawnSync('kill', ['-0', owner]).status !== 0) {
+      rmSync(dir, { recursive: true, force: true });
+      return;
+    }
+    await sleep(2000);
+  }
 }
 
 // ---------- slots ----------
@@ -221,29 +248,30 @@ async function bootSim(udid) {
 }
 
 async function ensureIosApp(udid, hash, { force = false } = {}) {
-  await waitForUnlocked('ios-build');
+  await waitForUnlocked(`ios-build-${hash}`);
   const entry = cacheEntry('ios', hash);
   if (existsSync(entry) && !force) {
     await runAsync('xcrun', ['simctl', 'install', udid, entry]);
     return 'cache hit';
   }
-  return withLock('ios-build', async () => {
+  return withLock(`ios-build-${hash}`, () => withLock('native-build', async () => {
     if (existsSync(entry) && !force) {
       await runAsync('xcrun', ['simctl', 'install', udid, entry]);
       return 'cache hit (after wait)';
     }
     log(`no cached iOS build for ${hash.slice(0, 12)}: building (expo run:ios), this takes minutes`);
+    // `expo run:ios` only prebuilds when ios/ is missing: in a worktree that has built once, a changed splash, icon or
+    // config plugin would build from the stale ios/ (and ship the old splash). Sync it first.
+    await runAsync('npx', ['expo', 'prebuild', '--platform', 'ios', '--no-install'], { cwd: MOBILE, stdio: 'inherit' });
     // No --configuration: with `--configuration Debug` Expo CLI always starts Metro and never exits.
-    // Background QoS (`taskpolicy -b`): the build stays on the efficiency cores. Slower, but a full Xcode
-    // build otherwise runs ~30 compilers on every core and overheats a laptop that also hosts other agents.
-    await runAsync('taskpolicy', ['-b', 'npx', 'expo', 'run:ios', '--device', udid, '--no-bundler'], {
+    await runAsync('npx', ['expo', 'run:ios', '--device', udid, '--no-bundler'], {
       cwd: MOBILE,
       stdio: 'inherit',
       env: { ...process.env, EXPO_PUBLIC_STORYBOOK: 'true' },
     });
     if (!existsSync(entry)) throw new Error(`build finished but ${entry} is missing (check buildCacheProvider in app.config.ts)`);
     return 'cache miss (built)';
-  });
+  }, NATIVE_BUILD_SLOTS));
 }
 
 // ---------- Android ----------
@@ -286,7 +314,7 @@ async function ensureEmulator(k) {
 async function buildAndroidApk(hash) {
   log(`no cached Android build for ${hash.slice(0, 12)}: prebuild + gradle assembleDebug, this takes minutes`);
   await runAsync('npx', ['expo', 'prebuild', '--platform', 'android', '--no-install'], { cwd: MOBILE, stdio: 'inherit' });
-  await runAsync('taskpolicy', ['-b', './gradlew', 'app:assembleDebug', '-PreactNativeArchitectures=arm64-v8a', '--max-workers=4'], {
+  await runAsync('./gradlew', ['app:assembleDebug', '-PreactNativeArchitectures=arm64-v8a'], {
     cwd: path.join(MOBILE, 'android'),
     stdio: 'inherit',
   });
@@ -298,24 +326,40 @@ async function buildAndroidApk(hash) {
 }
 
 async function ensureAndroidApp(serial, hash, { force = false } = {}) {
-  await waitForUnlocked('android-build');
+  await waitForUnlocked(`android-build-${hash}`);
   let how = 'cache hit';
   if (!existsSync(cacheEntry('android', hash)) || force) {
-    how = await withLock('android-build', async () => {
+    how = await withLock(`android-build-${hash}`, () => withLock('native-build', async () => {
       if (existsSync(cacheEntry('android', hash)) && !force) return 'cache hit (after wait)';
       await buildAndroidApk(hash);
       return 'cache miss (built)';
-    });
+    }, NATIVE_BUILD_SLOTS));
   }
   if (serial) await runAsync(ADB, ['-s', serial, 'install', '-r', cacheEntry('android', hash)]);
   return how;
 }
 
 // ---------- Metro ----------
+/** The lockfile's hash: Metro resolves modules once, so a running Metro keeps serving the old dependency tree. */
+function depsStamp() {
+  const lock = path.join(ROOT, 'pnpm-lock.yaml');
+  return existsSync(lock) ? createHash('sha256').update(readFileSync(lock)).digest('hex').slice(0, 16) : '';
+}
+
 async function startMetro(k) {
   const port = metroPort(k);
-  if (portListening(port)) return 'already running';
+  const stampFile = path.join(LOCAL, 'metro.deps');
+  if (portListening(port)) {
+    // After a pull, rebase or `pnpm add`, a Metro started on the old tree fails with "Unable to resolve module" or
+    // serves a stale copy: restart it when the lockfile changed since it started.
+    const before = existsSync(stampFile) ? readFileSync(stampFile, 'utf8').trim() : '';
+    if (before === depsStamp()) return 'already running';
+    log('dependencies changed since Metro started: restarting it');
+    stopMetro(k);
+    for (let i = 0; i < 20 && portListening(port); i++) await sleep(250);
+  }
   mkdirSync(LOCAL, { recursive: true });
+  writeFileSync(stampFile, `${depsStamp()}\n`);
   const out = openSync(path.join(LOCAL, 'metro.log'), 'w');
   const child = spawn('npx', ['expo', 'start', '--dev-client', '--port', String(port)], {
     cwd: MOBILE,
@@ -390,6 +434,7 @@ async function up() {
   const env = { SUPABASE_EXPERIMENTAL_STACK: '1' };
 
   await step('supabase stack start + .env.local', () => {
+    assertDockerResponsive();
     run('supabase', ['stack', 'start', '--runtime', 'docker', '--output-format', 'text'], { cwd: ROOT, env: { ...process.env, ...env } });
     if (flag('reset')) run('supabase', ['db', 'reset', '--local', '--yes'], { cwd: ROOT, env: { ...process.env, ...env } });
     regenerateEnv({ k, metroPort: metroPort(k) });

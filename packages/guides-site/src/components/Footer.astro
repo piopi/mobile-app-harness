@@ -1,0 +1,12 @@
+---
+// Starlight's footer (previous and next guide) and the app's sign-off. No link to any other site.
+import Default from '@astrojs/starlight/components/Footer.astro';
+import site, { href } from '../lib/site.mjs';
+---
+
+<Default />
+<div class="brand-foot">
+  <a href={href()}>{site.words.footer}</a>
+  <span>{site.words.title}</span>
+  {site.glossary && <a href={href(site.glossary.href)}>{site.glossary.title}</a>}
+</div>

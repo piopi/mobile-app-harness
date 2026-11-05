@@ -1,0 +1,29 @@
+name: pr-body
+
+# One cheap job for the PR's own rules (scripts/ci/pr-rules.mjs): a Conventional Commit title, the template's
+# required sections (Summary, Delight, Tests) filled, and a changeset or "No user-facing change". Re-runs when the
+# title or description is edited. A plain script rather than a marketplace action: no extra job, no extra minutes.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-body-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-body:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/ci/check-pr-body.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

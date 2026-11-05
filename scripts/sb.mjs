@@ -6,6 +6,7 @@
 //   pnpm sb env        rewrite .env.local from the running stack
 //   pnpm sb <args...>  any other supabase command, run from the repo root
 import { spawnSync } from 'node:child_process';
+import { assertDockerResponsive } from './lib/docker.mjs';
 import { readEnv, regenerateEnv, ROOT } from './lib/env.mjs';
 
 const env = { ...process.env, SUPABASE_EXPERIMENTAL_STACK: '1' };
@@ -21,6 +22,12 @@ const slot = () => {
 const [cmd, ...rest] = process.argv.slice(2);
 switch (cmd) {
   case 'start':
+    try {
+      assertDockerResponsive();
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
     sb('stack', 'start', '--runtime', 'docker', '--output-format', 'text', ...rest);
     regenerateEnv(slot());
     console.log('wrote .env.local and apps/mobile/.env.local');

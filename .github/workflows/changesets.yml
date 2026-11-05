@@ -1,0 +1,42 @@
+name: changesets
+
+# Keeps the "Version packages" PR on main up to date (docs/release.md): it consumes the changesets, bumps
+# apps/mobile/package.json `version` (the store version) and writes apps/mobile/CHANGELOG.md, whose section becomes the
+# release notes and the OTA update message. Runs only when a changeset lands or is consumed.
+on:
+  push:
+    branches: [main]
+    paths: ['.changeset/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: changesets
+  cancel-in-progress: true
+
+jobs:
+  version:
+    name: version packages PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: changesets/action@v2.1.2
+        with:
+          version-script: pnpm changeset version
+          pr-title: 'chore(release): version packages'
+          commit-message: 'chore(release): version packages'
+          # A PR opened with the default token runs no workflows, so its required checks never start. CHANGESETS_TOKEN
+          # (a fine-grained token, docs/release.md "Setup") fixes that; without it, close and reopen the PR to run them.
+          github-token: ${{ secrets.CHANGESETS_TOKEN || github.token }}

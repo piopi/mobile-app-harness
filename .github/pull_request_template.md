@@ -1,12 +1,21 @@
 ## Summary
 
-<!-- 3-5 bullets on what a member, staff or tester notices. No file names or code identifiers. -->
+<!-- 3-5 bullets on what a user, an admin or a tester notices. No file names or code identifiers. -->
 
 -
 
 ## Context
 
 <!-- 1-2 lines: why this PR exists. Link the ticket (Closes #N) and the map. -->
+
+## Changeset
+
+<!--
+Title this PR as a Conventional Commit: `feat(scope): …`, `fix: …`, `chore: …` (CI checks it; the squash commit keeps it).
+A change a user notices adds a changeset: `pnpm changeset`, pick the app package (apps/mobile), patch (a fix) or minor
+(a feature), and one sentence they'd understand. It becomes the release notes and the update message (docs/release.md).
+Otherwise write "No user-facing change" here. CI fails a PR with neither.
+-->
 
 ## Reference parity
 
@@ -66,6 +75,17 @@ E2E: the Maestro flow(s) for the critical path, run locally with `pnpm e2e` (no 
 - **pgTAP:**
 - **Maestro:**
 
+## Guides
+
+<!--
+CI's guide-impact check lists every how-to guide whose screens this PR changes (the guide's `covers`) while the guide file is unchanged.
+Update those guides (how-to-guide skill), or name each one on the line below with why its steps and screenshots still hold,
+for example: Guides: browse-items (copy only, no step changes), edit-profile (testID rename only)
+Write "None affected" when the check lists none.
+-->
+
+Guides:
+
 ## Checklist
 
 - [ ] Delight skill run: polish applied and peaks proposed, or not user-facing
@@ -73,6 +93,8 @@ E2E: the Maestro flow(s) for the critical path, run locally with `pnpm e2e` (no 
 - [ ] `pnpm test:integration && pnpm test:db` green locally (DB changes)
 - [ ] Maestro flow added or updated and green (`pnpm e2e`), or no user-facing path changed
 - [ ] Screenshots committed, mapped in docs/screenshots/README.md and embedded above (SHA-pinned), or no UI change
+- [ ] How-to guides follow the change (how-to-guide skill): updated or added and `pnpm guide check` green for the guides this flow touches, or no user-facing flow changed
+- [ ] Changeset added (`pnpm changeset`), or "No user-facing change" above
 - [ ] Reference app studied first (`pnpm reference`), or no reference app / not a ported screen
 - [ ] Deferred work filed on a ticket (linked above), or nothing deferred
 - [ ] Screens compose packages/ui only; new visual patterns added there with a story

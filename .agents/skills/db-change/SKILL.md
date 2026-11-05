@@ -85,6 +85,21 @@ Scenarios (`pnpm seed` lists them with their sign-in): onboarding, terms-outdate
 | `expectOk`, `expectRpcError(result, code)`, `expectForbidden(result, code?)` | the error contract |
 | `IDS` | seeded member ids |
 
+## Debugging a hosted project
+
+Local stacks hide hosted-only failures (new API keys, secrets, cold starts). To read a hosted project's logs without the dashboard, ask the Management API (the human's personal access token, never committed):
+
+```bash
+curl -sG "https://api.supabase.com/v1/projects/$REF/analytics/endpoints/logs" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  --data-urlencode "iso_timestamp_start=2026-01-01T10:00:00Z" --data-urlencode "iso_timestamp_end=2026-01-01T11:00:00Z" \
+  --data-urlencode "sql=select timestamp, source, event_message from logs where source = 'function_logs' order by timestamp desc limit 100"
+```
+
+- One table, `logs`, in the ClickHouse dialect: pick the stream with `source` (`edge_logs` for the API gateway's requests and status codes, `function_logs` for an Edge Function's own output, `postgres_logs`, `auth_logs`). Name the columns you want; `select *` and the dashboard's per-source table names don't work here.
+- Without timestamps it reads only the last minute; a range is at most 24 hours.
+- A 401 "Expected 3 parts in JWT" in `edge_logs` is a new `sb_secret_`/`sb_publishable_` key sent as a bearer (AGENTS.md).
+
 ## Rules
 
 - Never edit an applied migration that is on `main`; add a new one.

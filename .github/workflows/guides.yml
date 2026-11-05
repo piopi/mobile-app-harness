@@ -1,0 +1,30 @@
+# How-to guides: every guide parses, names only files that exist, and every `covers` entry matches a file
+# (`pnpm guide check --static`). Runs on PRs that touch a guide or the guide tooling. It also builds the site (Astro
+# Starlight) from no captures, so a broken page or config fails here. Whether a PR changes a covered screen without
+# its guide: guide-impact.yml. The device half (`pnpm guide check`) stays local: there is no device CI.
+name: guides
+
+on:
+  pull_request:
+    paths: ['apps/mobile/.maestro/guides/**', 'scripts/guide/**', 'scripts/guide.mjs', 'packages/guides-site/**', 'GLOSSARY.md', 'harness.config.json']
+
+concurrency:
+  group: guides-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: guide check (static)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm guide check --static
+      # The site builds (Starlight, Pagefind) with no captures: the landing, audience pages and glossary.
+      - run: pnpm guide render
